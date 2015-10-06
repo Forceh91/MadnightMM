@@ -4,6 +4,7 @@
 #include <CommCtrl.h>
 
 #include "mm_window.h"
+#include "mm_controls.h"
 
 // make this look at least somewhat nice (we're programmers, not designers)
 #pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
@@ -16,6 +17,11 @@ LRESULT CALLBACK mm_wnd_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
+		case WM_COMMAND:
+		{
+			mm_control_handler(hWnd, wParam);
+		}
+		break;
 		case WM_CLOSE:
 		{
 			mm_is_running = false;
@@ -56,7 +62,7 @@ bool mm_create_window(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 		return false;
 
 	icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
-	icex.dwICC = 0;
+	icex.dwICC = ICC_LISTVIEW_CLASSES;
 
 	if (!InitCommonControlsEx(&icex))
 		return false;
@@ -65,6 +71,9 @@ bool mm_create_window(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 	mm_window = CreateWindowEx(WS_EX_CLIENTEDGE, _TEXT("MadnightMM"), _TEXT("Madnight Mod Manager"), WS_CAPTION | WS_SYSMENU | WS_MINIMIZE, CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, 0, 0, hInstance, 0);
 	if (!mm_window)
 		return false;
+
+	// create the controls
+	mm_create_controls(mm_window, hInstance);
 
 	// set the font
 	SendMessage(mm_window, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);

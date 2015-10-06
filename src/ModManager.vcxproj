@@ -19,11 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\mm_controls.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\mm_window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\mm_window.h" />
+    <ClInclude Include="source\mm_controls.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{49997BAF-C372-4857-930B-19EFD2240782}</ProjectGuid>

@@ -21,9 +21,15 @@
     <ClCompile Include="source\mm_window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\mm_controls.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\mm_window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\mm_controls.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
