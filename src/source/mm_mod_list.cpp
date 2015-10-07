@@ -3,17 +3,20 @@
 #include <CommCtrl.h>
 #include <stdio.h>
 
-#include "mm_mod_item.h"
 #include "mm_mod_list.h"
 
+#define MAX_MOD_FILES 1000
+
 HWND mm_mod_list = 0;
-mm_mod_item mm_mod_item_list[1000] = { 0 };
+mm_mod_item* mm_mod_item_list[MAX_MOD_FILES] = { 0 };
 int freeModSlot = 0;
 
 void mm_initialize_mod_list(HWND mmListview)
 {
+	// store this for future use
 	mm_mod_list = mmListview;
 
+	// update the style of the list view
 	ListView_SetExtendedListViewStyle(mm_mod_list, LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT | LVS_EX_CHECKBOXES | LVS_EX_AUTOSIZECOLUMNS);
 
 	// dodgy work around for column 0 always overriding the format
@@ -67,7 +70,7 @@ void mm_clear_mod_list(void)
 	freeModSlot = 0;
 }
 
-void mm_add_mod_item(mm_mod_item& modItem)
+void mm_add_mod_item(mm_mod_item* modItem)
 {
 	mm_mod_item_list[freeModSlot] = modItem;
 
@@ -80,7 +83,7 @@ void mm_add_mod_item(mm_mod_item& modItem)
 	// set the name
 	listviewItem = { 0 };
 	listviewItem.mask = LVIF_TEXT;
-	listviewItem.pszText = modItem.mod_name;
+	listviewItem.pszText = modItem->mod_name;
 	listviewItem.iItem = freeModSlot;
 	listviewItem.iSubItem = MOD_LIST_COLUMN_NAME;
 
@@ -91,7 +94,7 @@ void mm_add_mod_item(mm_mod_item& modItem)
 	listviewItem.mask = LVIF_TEXT;
 	
 	char fileSize[128] = { 0 };
-	sprintf(fileSize, "%0.2fMB", ((float)modItem.fileSize / 1000000));
+	sprintf(fileSize, "%0.2fMB", ((float)modItem->fileSize / 1000000));
 	listviewItem.pszText = fileSize;
 
 	listviewItem.iItem = freeModSlot;
@@ -101,5 +104,27 @@ void mm_add_mod_item(mm_mod_item& modItem)
 
 	// update the free mod slot
 	freeModSlot++;
+}
+
+void mm_mod_list_handle_item_change(LPNMLISTVIEW lParam)
+{
+	NMHDR* hdr = &lParam->hdr;
+	if (lParam->uChanged & LVIF_STATE)
+	{
+		// find if the checkbox is checked or not
+		int isChecked = ListView_GetCheckState(hdr->hwndFrom, lParam->iItem);
+
+		// make sure we haven't selected a listview item that is out of bounds of what mods we know of
+		if (lParam->iItem >= MAX_MOD_FILES)
+			return;
+
+		// find the mod item and tell it that enabled is true
+		mm_mod_item* mmModItem = mm_mod_item_list[lParam->iItem];
+		if (!mmModItem)
+			return;
+
+		// if it exists then we can toggle the enabled value of it
+		mmModItem->enabled = (isChecked == 0 ? false : true);
+	}
 }
 

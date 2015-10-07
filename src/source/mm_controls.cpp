@@ -128,15 +128,15 @@ void mm_handle_mod_directory_found(HWND hWnd, TCHAR* filePath)
 					continue;
 
 				// create a new mm_mod_item
-				mm_mod_item modItem = { 0 };
-				strcpy(modItem.file_path, findData.cFileName);
+				mm_mod_item* modItem = new mm_mod_item();
+				strcpy(modItem->file_path, findData.cFileName);
 
 				// store the mod name
 				findData.cFileName[len - 4] = '\0';
-				strcpy(modItem.mod_name, findData.cFileName);
+				strcpy(modItem->mod_name, findData.cFileName);
 
 				// and file size
-				modItem.fileSize = findData.nFileSizeLow;
+				modItem->fileSize = findData.nFileSizeLow;
 
 				// do some other shit (such as figuring out what files go in it)
 

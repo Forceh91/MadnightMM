@@ -5,6 +5,7 @@
 
 #include "mm_window.h"
 #include "mm_controls.h"
+#include "mm_mod_list.h"
 
 // make this look at least somewhat nice (we're programmers, not designers)
 #pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
@@ -21,6 +22,14 @@ LRESULT CALLBACK mm_wnd_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 			mm_control_handler(hWnd, wParam);
 		}
+		break;
+		case WM_NOTIFY:
+			switch (((LPNMHDR)lParam)->code)
+			{
+				case LVN_ITEMCHANGED:
+					mm_mod_list_handle_item_change((LPNMLISTVIEW)lParam);
+				break;
+			}
 		break;
 		case WM_CLOSE:
 		{
