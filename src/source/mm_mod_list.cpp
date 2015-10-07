@@ -16,33 +16,46 @@ void mm_initialize_mod_list(HWND mmListview)
 
 	ListView_SetExtendedListViewStyle(mm_mod_list, LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT | LVS_EX_CHECKBOXES | LVS_EX_AUTOSIZECOLUMNS);
 
-	// is this enabled?
+	// dodgy work around for column 0 always overriding the format
 	LVCOLUMN lvColumn = { 0 };
-	lvColumn.mask = LVCF_WIDTH | LVCF_SUBITEM;
-	lvColumn.cx = 25;
-	lvColumn.iSubItem = MOD_LIST_COLUMN_ENABLED;
+	lvColumn.iSubItem = 0;
+	//
 
-	SendMessage(mm_mod_list, LVM_INSERTCOLUMN, MOD_LIST_COLUMN_ENABLED, (LPARAM)&lvColumn);
+	SendMessage(mm_mod_list, LVM_INSERTCOLUMN, 0, (LPARAM)&lvColumn);
+
+	// is this enabled?
+	lvColumn = { 0 };
+	lvColumn.mask = LVCF_WIDTH | LVCF_SUBITEM | LVCF_FMT;
+	lvColumn.cx = 20;
+	lvColumn.iSubItem = MOD_LIST_COLUMN_ENABLED;
+	lvColumn.fmt = LVCFMT_FIXED_WIDTH | LVCFMT_NO_TITLE | HDF_CHECKBOX;
+
+	SendMessage(mm_mod_list, LVM_INSERTCOLUMN, MOD_LIST_COLUMN_ENABLED + 1, (LPARAM)&lvColumn);
 
 	// what is the name of this mod?
 	lvColumn = { 0 };
 	lvColumn.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
 	lvColumn.pszText = "Name";
 	lvColumn.cx = 500;
-	lvColumn.fmt = LVCFMT_LEFT;
+	lvColumn.fmt = LVCFMT_LEFT | LVCFMT_FIXED_WIDTH;
 	lvColumn.iSubItem = MOD_LIST_COLUMN_NAME;
 
-	SendMessage(mm_mod_list, LVM_INSERTCOLUMN, MOD_LIST_COLUMN_NAME, (LPARAM)&lvColumn);
+	SendMessage(mm_mod_list, LVM_INSERTCOLUMN, MOD_LIST_COLUMN_NAME + 1, (LPARAM)&lvColumn);
 
 	// how big is it?
 	lvColumn = { 0 };
 	lvColumn.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
 	lvColumn.pszText = "File Size";
 	lvColumn.cx = 75;
-	lvColumn.fmt = LVCFMT_RIGHT;
+	lvColumn.fmt = LVCFMT_RIGHT | LVCFMT_FIXED_WIDTH;
 	lvColumn.iSubItem = MOD_LIST_COLUMN_FILE_SIZE;
 
-	SendMessage(mm_mod_list, LVM_INSERTCOLUMN, MOD_LIST_COLUMN_FILE_SIZE, (LPARAM)&lvColumn);
+	SendMessage(mm_mod_list, LVM_INSERTCOLUMN, MOD_LIST_COLUMN_FILE_SIZE + 1, (LPARAM)&lvColumn);
+
+	// dodgy work around for column 0 always overriding the format
+	lvColumn = { 0 };
+	SendMessage(mm_mod_list, LVM_DELETECOLUMN, 0, (LPARAM)&lvColumn);
+	//
 }
 
 void mm_clear_mod_list(void)
