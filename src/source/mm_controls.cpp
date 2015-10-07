@@ -5,6 +5,8 @@
 #include <ShlObj.h>
 
 #include "mm_controls.h"
+#include "mm_mod_item.h"
+#include "mm_mod_list.h"
 
 HWND mm_mod_location_label = { 0 };
 HWND mm_mod_location_browse_button = { 0 };
@@ -18,27 +20,11 @@ void mm_create_controls(HWND mmWindow, HINSTANCE hInstance)
 	mm_mod_location_label = CreateWindowEx(0, WC_EDIT, _TEXT(""), WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 100, 15, 650, 20, mmWindow, (HMENU)MM_CONTROL_MOD_LOCATION_LABEL, hInstance, 0);
 	SendMessage(mm_mod_location_label, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
 
-	mm_mod_file_list = CreateWindowEx(0, WC_LISTVIEW, _TEXT(""), WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_EX_CHECKBOXES | LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT, 10, 40, 760, 400, mmWindow, (HMENU)MM_CONTROL_MOD_FILE_LIST, hInstance, 0);
+	mm_mod_file_list = CreateWindowEx(0, WC_LISTVIEW, _TEXT(""), WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_SHOWSELALWAYS, 10, 40, 760, 400, mmWindow, (HMENU)MM_CONTROL_MOD_FILE_LIST, hInstance, 0);
 	SendMessage(mm_mod_file_list, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
 
-	// add a column
-	LVCOLUMN lvColumn = { 0 };
-	lvColumn.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT;
-	lvColumn.iSubItem = 0;
-	lvColumn.pszText = "Enabled";
-	lvColumn.cx = 75;
-	lvColumn.fmt = LVCFMT_CENTER;
-
-	SendMessage(mm_mod_file_list, LVM_INSERTCOLUMN, 0, (LPARAM)&lvColumn);
-
-	lvColumn = { 0 };
-	lvColumn.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT;
-	lvColumn.iSubItem = 1;	
-	lvColumn.pszText = "Mod Name";
-	lvColumn.cx = 500;
-	lvColumn.fmt = LVCFMT_LEFT;
-
-	SendMessage(mm_mod_file_list, LVM_INSERTCOLUMN, 1, (LPARAM)&lvColumn);
+	// set up the list view with everything we need
+	mm_initialize_mod_list(mm_mod_file_list);
 }
 
 void mm_control_handler(HWND mmWindow, WPARAM wParam)
@@ -114,6 +100,9 @@ static int CALLBACK mm_control_mod_browser_handler(HWND hWnd, UINT message, LPAR
 
 void mm_handle_mod_directory_found(HWND hWnd, TCHAR* filePath)
 {
+	// clear the mod list
+	mm_clear_mod_list();
+
 #ifdef _WIN32
 	WIN32_FIND_DATA findData;
 	char* extension = NULL;
@@ -133,26 +122,26 @@ void mm_handle_mod_directory_found(HWND hWnd, TCHAR* filePath)
 			{
 				// slice the extension and remove it from the file name
 				extension = &findData.cFileName[len - 3];
-				findData.cFileName[len - 4] = '\0';
 
 				// check this is a .zip file
 				if (strcmp(extension, "zip") != 0)
 					continue;
 
-				// add it to the list
-				LVITEM listviewItem = { 0 };
-				listviewItem.iItem = 0;
-				listviewItem.iSubItem = 0;
+				// create a new mm_mod_item
+				mm_mod_item modItem = { 0 };
+				strcpy(modItem.file_path, findData.cFileName);
 
-				ListView_InsertItem(mm_mod_file_list, &listviewItem);
+				// store the mod name
+				findData.cFileName[len - 4] = '\0';
+				strcpy(modItem.mod_name, findData.cFileName);
 
-				// and now we need to use setitem for the other columns
-				listviewItem.mask = LVIF_TEXT;
-				listviewItem.pszText = findData.cFileName;
-				listviewItem.iItem = 0;
-				listviewItem.iSubItem = 1;
-				
-				ListView_SetItem(mm_mod_file_list, &listviewItem);
+				// and file size
+				modItem.fileSize = findData.nFileSizeLow;
+
+				// do some other shit (such as figuring out what files go in it)
+
+				// and add it
+				mm_add_mod_item(modItem);
 
 			}
 		} while (FindNextFile(hFind, &findData));
