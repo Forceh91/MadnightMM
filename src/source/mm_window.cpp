@@ -77,7 +77,7 @@ bool mm_create_window(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 		return false;
 
 	// try to create the window
-	mm_window = CreateWindowEx(WS_EX_CLIENTEDGE, _TEXT("MadnightMM"), _TEXT("Madnight Mod Manager"), WS_CAPTION | WS_SYSMENU | WS_MINIMIZE, CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, 0, 0, hInstance, 0);
+	mm_window = CreateWindowEx(WS_EX_CLIENTEDGE, _TEXT("MadnightMM"), _TEXT("Madnight Mod Manager"), WS_CAPTION | WS_SYSMENU | WS_MINIMIZE, CW_USEDEFAULT, CW_USEDEFAULT, 800, 800, 0, 0, hInstance, 0);
 	if (!mm_window)
 		return false;
 

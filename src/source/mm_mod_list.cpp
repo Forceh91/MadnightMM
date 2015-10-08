@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "mm_mod_list.h"
+#include "mm_controls.h"
 
 #define MAX_MOD_FILES 1000
 
@@ -125,6 +126,22 @@ void mm_mod_list_handle_item_change(LPNMLISTVIEW lParam)
 
 		// if it exists then we can toggle the enabled value of it
 		mmModItem->enabled = (isChecked == 0 ? false : true);
+
+		// check for selected item
+		int index = ListView_GetNextItem(hdr->hwndFrom, -1, LVNI_SELECTED);
+		if (index == -1)
+		{
+			mm_update_mod_information(NULL);
+			return;
+		}
+
+		// find our mod item instance of it
+		mm_mod_item* mmSelectedModItem = mm_mod_item_list[index];
+		if (!mmSelectedModItem)
+			return;
+		
+		// update the mod info
+		mm_update_mod_information(mmSelectedModItem);
 	}
 }
 

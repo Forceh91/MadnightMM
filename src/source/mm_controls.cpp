@@ -3,28 +3,83 @@
 #include <tchar.h>
 #include <CommCtrl.h>
 #include <ShlObj.h>
+#include <stdio.h>
 
-#include "mm_controls.h"
-#include "mm_mod_item.h"
 #include "mm_mod_list.h"
+#include "mm_controls.h"
 
+HWND mm_mod_location_group = { 0 };
 HWND mm_mod_location_label = { 0 };
 HWND mm_mod_location_browse_button = { 0 };
 HWND mm_mod_file_list = { 0 };
 
+HWND mm_mod_info_group = { 0 };
+HWND mm_mod_info_name_header = { 0 };
+HWND mm_mod_info_name_data = { 0 };
+HWND mm_mod_info_size_header = { 0 };
+HWND mm_mod_info_size_data = { 0 };
+HWND mm_mod_info_enabled_header = { 0 };
+HWND mm_mod_info_enabled_data = { 0 };
+HWND mm_mod_info_file_count_header = { 0 };
+HWND mm_mod_info_file_count_data = { 0 };
+HWND mm_mod_info_file_list_header = { 0 };
+HWND mm_mod_info_file_list_data = { 0 };
+
 void mm_create_controls(HWND mmWindow, HINSTANCE hInstance)
 {
-	mm_mod_location_browse_button = CreateWindowEx(0, WC_BUTTON, _TEXT("Browse..."), BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE, 10, 10, 80, 25, mmWindow, (HMENU)MM_CONTROL_MOD_LOCATION_BROWSE, hInstance, 0);
+	mm_mod_location_group = CreateWindowEx(0, WC_BUTTON, _TEXT("Mod Listings"), BS_GROUPBOX | WS_GROUP | WS_CHILD | WS_VISIBLE, 10, 10, 750, 430, mmWindow, 0, hInstance, 0);
+	SendMessage(mm_mod_location_group, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	mm_mod_location_browse_button = CreateWindowEx(0, WC_BUTTON, _TEXT("Browse..."), BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE, 20, 30, 80, 25, mmWindow, (HMENU)MM_CONTROL_MOD_LOCATION_BROWSE, hInstance, 0);
 	SendMessage(mm_mod_location_browse_button, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
 
-	mm_mod_location_label = CreateWindowEx(0, WC_EDIT, _TEXT(""), WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 100, 15, 650, 20, mmWindow, (HMENU)MM_CONTROL_MOD_LOCATION_LABEL, hInstance, 0);
+	mm_mod_location_label = CreateWindowEx(0, WC_EDIT, _TEXT("Please select the directory that your mods are stored in..."), WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 110, 35, 640, 25, mmWindow, (HMENU)MM_CONTROL_MOD_LOCATION_LABEL, hInstance, 0);
 	SendMessage(mm_mod_location_label, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
 
-	mm_mod_file_list = CreateWindowEx(0, WC_LISTVIEW, _TEXT(""), WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_SHOWSELALWAYS, 10, 40, 760, 400, mmWindow, (HMENU)MM_CONTROL_MOD_FILE_LIST, hInstance, 0);
+	mm_mod_file_list = CreateWindowEx(0, WC_LISTVIEW, _TEXT(""), WS_CHILD | WS_VISIBLE | ES_AUTOVSCROLL | LVS_REPORT | LVS_SHOWSELALWAYS, 20, 65, 730, 365, mmWindow, (HMENU)MM_CONTROL_MOD_FILE_LIST, hInstance, 0);
 	SendMessage(mm_mod_file_list, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
 
 	// set up the list view with everything we need
 	mm_initialize_mod_list(mm_mod_file_list);
+	
+	// mod info group
+	mm_mod_info_group = CreateWindowEx(0, WC_BUTTON, _TEXT("Mod Information"), BS_GROUPBOX | WS_GROUP | WS_CHILD | WS_VISIBLE, 10, 450, 750, 150, mmWindow, 0, hInstance, 0);
+	SendMessage(mm_mod_info_group, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	// name info
+	mm_mod_info_name_header = CreateWindowEx(0, WC_STATIC, _TEXT("Name:"), WS_CHILD | WS_VISIBLE | SS_LEFT, 20, 470, 50, 25, mmWindow, 0, hInstance, 0);
+	SendMessage(mm_mod_info_name_header, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	mm_mod_info_name_data = CreateWindowEx(0, WC_STATIC, _TEXT("-"), WS_CHILD | WS_VISIBLE | SS_LEFT, 80, 470, 350, 25, mmWindow, 0, hInstance, 0);
+	SendMessage(mm_mod_info_name_data, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	// size info
+	mm_mod_info_size_header = CreateWindowEx(0, WC_STATIC, _TEXT("Size:"), WS_CHILD | WS_VISIBLE | SS_LEFT, 20, 490, 50, 25, mmWindow, 0, hInstance, 0);
+	SendMessage(mm_mod_info_size_header, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	mm_mod_info_size_data = CreateWindowEx(0, WC_STATIC, _TEXT("-"), WS_CHILD | WS_VISIBLE | SS_LEFT, 80, 490, 350, 25, mmWindow, 0, hInstance, 0);
+	SendMessage(mm_mod_info_size_data, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	// file count info
+	mm_mod_info_file_count_header = CreateWindowEx(0, WC_STATIC, _TEXT("File Count:"), WS_CHILD | WS_VISIBLE | SS_LEFT, 20, 510, 50, 25, mmWindow, 0, hInstance, 0);
+	SendMessage(mm_mod_info_file_count_header, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	mm_mod_info_file_count_data = CreateWindowEx(0, WC_STATIC, _TEXT("-"), WS_CHILD | WS_VISIBLE | SS_LEFT, 80, 510, 50, 25, mmWindow, 0, hInstance, 0);
+	SendMessage(mm_mod_info_file_count_data, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	// enabled info
+	mm_mod_info_enabled_header = CreateWindowEx(0, WC_STATIC, _TEXT("Enabled:"), WS_CHILD | WS_VISIBLE | SS_LEFT, 20, 530, 50, 25, mmWindow, 0, hInstance, 0);
+	SendMessage(mm_mod_info_enabled_header, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	mm_mod_info_enabled_data = CreateWindowEx(0, WC_STATIC, _TEXT("-"), WS_CHILD | WS_VISIBLE | SS_LEFT, 80, 530, 350, 25, mmWindow, 0, hInstance, 0);
+	SendMessage(mm_mod_info_enabled_data, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	// file list info
+	mm_mod_info_file_list_header = CreateWindowEx(0, WC_STATIC, _TEXT("Mod files"), WS_CHILD | WS_VISIBLE | SS_LEFT, 440, 470, 50, 25, mmWindow, 0, hInstance, 0);
+	SendMessage(mm_mod_info_file_list_header, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	mm_mod_info_file_list_data = CreateWindowEx(0, WC_LISTBOX, 0, WS_VISIBLE | WS_CHILD | ES_AUTOVSCROLL | LBS_STANDARD | LBS_NOSEL, 440, 490, 300, 110, mmWindow, 0, hInstance, 0);
+	SendMessage(mm_mod_info_file_list_data, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
 }
 
 void mm_control_handler(HWND mmWindow, WPARAM wParam)
@@ -150,5 +205,26 @@ void mm_handle_mod_directory_found(HWND hWnd, TCHAR* filePath)
 		FindClose(hFind);
 	}
 #endif
+}
+
+void mm_update_mod_information(mm_mod_item* mod_item)
+{
+	// double check that this is valid
+	if (!mod_item)
+	{
+		Static_SetText(mm_mod_info_name_data, "-");
+		Static_SetText(mm_mod_info_size_data, "-");
+		Static_SetText(mm_mod_info_enabled_data, "");
+
+		return;
+	}
+
+	Static_SetText(mm_mod_info_name_data, mod_item->mod_name);
+
+	char fileSize[128] = { 0 };
+	sprintf(fileSize, "%0.2fMB", ((float)mod_item->fileSize / 1000000));
+	Static_SetText(mm_mod_info_size_data, fileSize);
+
+	Static_SetText(mm_mod_info_enabled_data, (mod_item->enabled ? "Yes" : "No"));
 }
 
