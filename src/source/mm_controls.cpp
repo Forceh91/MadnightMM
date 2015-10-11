@@ -160,45 +160,26 @@ void mm_handle_mod_directory_found(HWND hWnd, TCHAR* filePath)
 
 #ifdef _WIN32
 	WIN32_FIND_DATA findData;
-	char* extension = NULL;
-	size_t len = 0;
+	char fileName[MAX_PATH];
 
 	// find all files in the folder
-	_tcscat(filePath, "/*");
-
-	HANDLE hFind = FindFirstFile(filePath, &findData);
+	sprintf_s(fileName, sizeof(fileName), "%s/*", filePath);
+	HANDLE hFind = FindFirstFile(fileName, &findData);
+	
 	if (hFind != INVALID_HANDLE_VALUE)
 	{
 		// while we find files, go through them
 		do
 		{
-			len = strlen(findData.cFileName);
-			if (len > 3)
+			mm_mod_item *modItem = mm_create_mod_item(filePath, findData.cFileName);
+
+			// if the mod item is valid (our program supports the mod format), add it to the list
+			if (modItem != NULL)
 			{
-				// slice the extension and remove it from the file name
-				extension = &findData.cFileName[len - 3];
-
-				// check this is a .zip file
-				if (strcmp(extension, "zip") != 0)
-					continue;
-
-				// create a new mm_mod_item
-				mm_mod_item* modItem = new mm_mod_item();
-				strcpy(modItem->file_path, findData.cFileName);
-
-				// store the mod name
-				findData.cFileName[len - 4] = '\0';
-				strcpy(modItem->mod_name, findData.cFileName);
-
-				// and file size
-				modItem->fileSize = findData.nFileSizeLow;
-
-				// do some other shit (such as figuring out what files go in it)
-
-				// and add it
+				modItem->file_size = findData.nFileSizeLow;
 				mm_add_mod_item(modItem);
-
 			}
+		
 		} while (FindNextFile(hFind, &findData));
 
 		// close the handle
@@ -221,10 +202,13 @@ void mm_update_mod_information(mm_mod_item* mod_item)
 
 	Static_SetText(mm_mod_info_name_data, mod_item->mod_name);
 
-	char fileSize[128] = { 0 };
-	sprintf(fileSize, "%0.2fMB", ((float)mod_item->fileSize / 1000000));
-	Static_SetText(mm_mod_info_size_data, fileSize);
+	char fileInfo[128] = { 0 };
+
+	sprintf(fileInfo, "%0.2fMB", ((float)mod_item->file_size / 1000000));
+	Static_SetText(mm_mod_info_size_data, fileInfo);
+
+	sprintf(fileInfo, "%u", mod_item->file_count);
+	Static_SetText(mm_mod_info_file_count_data, fileInfo);
 
 	Static_SetText(mm_mod_info_enabled_data, (mod_item->enabled ? "Yes" : "No"));
 }
-

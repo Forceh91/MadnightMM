@@ -95,7 +95,7 @@ void mm_add_mod_item(mm_mod_item* modItem)
 	listviewItem.mask = LVIF_TEXT;
 	
 	char fileSize[128] = { 0 };
-	sprintf(fileSize, "%0.2fMB", ((float)modItem->fileSize / 1000000));
+	sprintf(fileSize, "%0.2fMB", ((float)modItem->file_size / 1000000));
 	listviewItem.pszText = fileSize;
 
 	listviewItem.iItem = freeModSlot;

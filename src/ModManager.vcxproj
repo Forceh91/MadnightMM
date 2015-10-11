@@ -21,13 +21,31 @@
   <ItemGroup>
     <ClCompile Include="source\mm_controls.cpp" />
     <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\mm_extractor.cpp" />
+    <ClCompile Include="source\mm_extractor_classes.cpp" />
+    <ClCompile Include="source\mm_mod_item.cpp" />
     <ClCompile Include="source\mm_mod_list.cpp" />
     <ClCompile Include="source\mm_window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="headers\mm_extractor.h" />
+    <ClInclude Include="headers\mm_extractor_classes.h" />
     <ClInclude Include="headers\mm_mod_item.h" />
     <ClInclude Include="headers\mm_mod_list.h" />
     <ClInclude Include="headers\mm_window.h" />
+    <ClInclude Include="libraries\7-Zip\CPP\7zip\Archive\IArchive.h" />
+    <ClInclude Include="libraries\7-Zip\CPP\7zip\ICoder.h" />
+    <ClInclude Include="libraries\7-Zip\CPP\7zip\IDecl.h" />
+    <ClInclude Include="libraries\7-Zip\CPP\7zip\IPassword.h" />
+    <ClInclude Include="libraries\7-Zip\CPP\7zip\IProgress.h" />
+    <ClInclude Include="libraries\7-Zip\CPP\7zip\IStream.h" />
+    <ClInclude Include="libraries\7-Zip\CPP\7zip\PropID.h" />
+    <ClInclude Include="libraries\7-Zip\CPP\Common\Defs.h" />
+    <ClInclude Include="libraries\7-Zip\CPP\Common\MyTypes.h" />
+    <ClInclude Include="libraries\7-Zip\CPP\Common\MyUnknown.h" />
+    <ClInclude Include="libraries\7-Zip\CPP\Common\MyWindows.h" />
+    <ClInclude Include="libraries\7-Zip\CPP\Common\Types.h" />
+    <ClInclude Include="libraries\7-Zip\C\Types.h" />
     <ClInclude Include="source\mm_controls.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -39,7 +57,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -52,7 +70,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -86,9 +104,11 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>./headers;./libraries;./libraries/7-Zip/CPP;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -96,12 +116,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>./headers</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./headers;./libraries;./libraries/7-Zip/CPP;</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_MBCS;_DEBUG;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>comctl32.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -111,11 +131,13 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>./headers;./libraries;./libraries/7-Zip/CPP;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -125,14 +147,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>./headers</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./headers;./libraries;./libraries/7-Zip/CPP;</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_MBCS;_DEBUG;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>comctl32.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

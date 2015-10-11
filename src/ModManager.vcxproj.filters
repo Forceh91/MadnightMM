@@ -13,6 +13,27 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Libraries">
+      <UniqueIdentifier>{85c4677c-7f4a-4b16-917e-b9bad1930a77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries\7-Zip">
+      <UniqueIdentifier>{c7053f25-5520-4e45-bd3b-6627fa26f1ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries\7-Zip\C">
+      <UniqueIdentifier>{01a1e66f-b644-484e-b296-7a8f043e71c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries\7-Zip\CPP">
+      <UniqueIdentifier>{55007a4f-db01-4dc8-899e-02784b011b40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries\7-Zip\CPP\7zip">
+      <UniqueIdentifier>{8414224f-a05e-4783-ac4b-8feaedc1fd0f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries\7-Zip\CPP\Common">
+      <UniqueIdentifier>{0729a784-3811-4dc1-9af7-83b99333d458}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries\7-Zip\CPP\7zip\Archive">
+      <UniqueIdentifier>{a391efc5-4fbc-4b9b-a1b2-5f4802f5d375}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp">
@@ -27,6 +48,15 @@
     <ClCompile Include="source\mm_mod_list.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\mm_mod_item.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\mm_extractor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\mm_extractor_classes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\mm_window.h">
@@ -39,6 +69,51 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="headers\mm_mod_list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\mm_extractor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\7-Zip\C\Types.h">
+      <Filter>Libraries\7-Zip\C</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\7-Zip\CPP\7zip\ICoder.h">
+      <Filter>Libraries\7-Zip\CPP\7zip</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\7-Zip\CPP\7zip\IDecl.h">
+      <Filter>Libraries\7-Zip\CPP\7zip</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\7-Zip\CPP\7zip\IPassword.h">
+      <Filter>Libraries\7-Zip\CPP\7zip</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\7-Zip\CPP\7zip\IProgress.h">
+      <Filter>Libraries\7-Zip\CPP\7zip</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\7-Zip\CPP\7zip\IStream.h">
+      <Filter>Libraries\7-Zip\CPP\7zip</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\7-Zip\CPP\7zip\PropID.h">
+      <Filter>Libraries\7-Zip\CPP\7zip</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\7-Zip\CPP\7zip\Archive\IArchive.h">
+      <Filter>Libraries\7-Zip\CPP\7zip\Archive</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\7-Zip\CPP\Common\Defs.h">
+      <Filter>Libraries\7-Zip\CPP\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\7-Zip\CPP\Common\MyTypes.h">
+      <Filter>Libraries\7-Zip\CPP\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\7-Zip\CPP\Common\MyUnknown.h">
+      <Filter>Libraries\7-Zip\CPP\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\7-Zip\CPP\Common\MyWindows.h">
+      <Filter>Libraries\7-Zip\CPP\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries\7-Zip\CPP\Common\Types.h">
+      <Filter>Libraries\7-Zip\CPP\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\mm_extractor_classes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
