@@ -211,4 +211,19 @@ void mm_update_mod_information(mm_mod_item* mod_item)
 	Static_SetText(mm_mod_info_file_count_data, fileInfo);
 
 	Static_SetText(mm_mod_info_enabled_data, (mod_item->enabled ? "Yes" : "No"));
+
+	// List mod files
+	SendMessage(mm_mod_info_file_list_data, LB_RESETCONTENT, 0, 0);
+
+	for (int i = 0; i < mod_item->item_count; ++i)
+	{
+		mm_mod_file *file = mod_item->files[i];
+
+		// Don't display directories
+		if ((file->flags & FFLAG_DIRECTORY) != 0)
+			continue;
+
+		SendMessage(mm_mod_info_file_list_data, LB_ADDSTRING, 0, (LPARAM)file->name);
+		SendMessage(mm_mod_info_file_list_data, LB_SETITEMDATA, 0, (LPARAM)i);
+	}
 }
