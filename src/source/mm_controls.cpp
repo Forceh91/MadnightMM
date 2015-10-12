@@ -195,7 +195,10 @@ void mm_update_mod_information(mm_mod_item* mod_item)
 	{
 		Static_SetText(mm_mod_info_name_data, "-");
 		Static_SetText(mm_mod_info_size_data, "-");
-		Static_SetText(mm_mod_info_enabled_data, "");
+		Static_SetText(mm_mod_info_file_count_data, "-");
+		Static_SetText(mm_mod_info_enabled_data, "-");
+
+		SendMessage(mm_mod_info_file_list_data, LB_RESETCONTENT, 0, 0);
 
 		return;
 	}
@@ -219,8 +222,8 @@ void mm_update_mod_information(mm_mod_item* mod_item)
 	{
 		mm_mod_file *file = mod_item->files[i];
 
-		// Don't display directories
-		if ((file->flags & FFLAG_DIRECTORY) != 0)
+		// Show game files only.
+		if ((file->flags & FFLAG_GAME_FILE) == 0)
 			continue;
 
 		SendMessage(mm_mod_info_file_list_data, LB_ADDSTRING, 0, (LPARAM)file->name);
