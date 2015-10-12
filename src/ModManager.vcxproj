@@ -25,6 +25,7 @@
     <ClCompile Include="source\mm_extractor_classes.cpp" />
     <ClCompile Include="source\mm_mod_item.cpp" />
     <ClCompile Include="source\mm_mod_list.cpp" />
+    <ClCompile Include="source\mm_utils.cpp" />
     <ClCompile Include="source\mm_window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -32,6 +33,7 @@
     <ClInclude Include="headers\mm_extractor_classes.h" />
     <ClInclude Include="headers\mm_mod_item.h" />
     <ClInclude Include="headers\mm_mod_list.h" />
+    <ClInclude Include="headers\mm_utils.h" />
     <ClInclude Include="headers\mm_window.h" />
     <ClInclude Include="libraries\7-Zip\CPP\7zip\Archive\IArchive.h" />
     <ClInclude Include="libraries\7-Zip\CPP\7zip\ICoder.h" />

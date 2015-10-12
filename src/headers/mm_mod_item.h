@@ -12,11 +12,13 @@ enum ModFileFormat {
 enum ModFileFlags {
 	FFLAG_NONE,
 	FFLAG_DIRECTORY = 1 << 0,
+	FFLAG_GAME_FILE = 1 << 1,
 };
 
 typedef struct _mm_mod_file
 {
-	char *name; // name/path of the file inside the archive
+	char *name; // name of the file inside the archive (without the path)
+	char *path; // full name of the file, including path and extension
 	unsigned char index; // index of the file within the archive
 	unsigned char flags; // flags for this mod file (see ModFileFlags above)
 
