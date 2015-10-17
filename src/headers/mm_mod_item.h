@@ -13,7 +13,13 @@ enum ModFileFlags {
 	FFLAG_NONE,
 	FFLAG_DIRECTORY = 1 << 0,
 	FFLAG_GAME_FILE = 1 << 1,
+	FFLAG_TEXTURE_LIVERY = 1 << 2,
+	FFLAG_TEXTURE_INTERIOR = 1 << 3,
+	FFLAG_QUALITY_HIGH = 1 << 4,
+	FFLAG_MOD_FILE = (FFLAG_TEXTURE_LIVERY|FFLAG_TEXTURE_INTERIOR),
 };
+
+typedef struct _mm_vehicle_data mm_vehicle_data;
 
 typedef struct _mm_mod_file
 {
@@ -21,6 +27,8 @@ typedef struct _mm_mod_file
 	char *path; // full name of the file, including path and extension
 	unsigned char index; // index of the file within the archive
 	unsigned char flags; // flags for this mod file (see ModFileFlags above)
+	unsigned char livery; // index of the livery
+	mm_vehicle_data *vehicle; // vehicle this file changes
 
 } mm_mod_file;
 
@@ -33,6 +41,7 @@ typedef struct _mm_mod_item
 	unsigned char file_format; // the format of the mod file archive (see ModFileFormat above)
 	unsigned char file_count; // the number of files inside the mod archive
 	unsigned char item_count; // the number of files and directories inside the mod archive
+	mm_vehicle_data *vehicle; // data of the vehicle this mod alters
 	mm_mod_file **files; // an array containing info about each file and directory inside the mod, length item_count
 
 } mm_mod_item;

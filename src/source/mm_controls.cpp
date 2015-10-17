@@ -7,6 +7,7 @@
 
 #include "mm_mod_list.h"
 #include "mm_controls.h"
+#include "mm_utils.h"
 
 HWND mm_mod_location_group = { 0 };
 HWND mm_mod_location_label = { 0 };
@@ -18,6 +19,8 @@ HWND mm_mod_info_name_header = { 0 };
 HWND mm_mod_info_name_data = { 0 };
 HWND mm_mod_info_size_header = { 0 };
 HWND mm_mod_info_size_data = { 0 };
+HWND mm_mod_info_vehicle_header = { 0 };
+HWND mm_mod_info_vehicle_data = { 0 };
 HWND mm_mod_info_enabled_header = { 0 };
 HWND mm_mod_info_enabled_data = { 0 };
 HWND mm_mod_info_file_count_header = { 0 };
@@ -67,11 +70,18 @@ void mm_create_controls(HWND mmWindow, HINSTANCE hInstance)
 	mm_mod_info_file_count_data = CreateWindowEx(0, WC_STATIC, _TEXT("-"), WS_CHILD | WS_VISIBLE | SS_LEFT, 80, 510, 50, 25, mmWindow, 0, hInstance, 0);
 	SendMessage(mm_mod_info_file_count_data, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
 
+	// vehicle info
+	mm_mod_info_vehicle_header = CreateWindowEx(0, WC_STATIC, _TEXT("Vehicle:"), WS_CHILD | WS_VISIBLE | SS_LEFT, 20, 530, 50, 25, mmWindow, 0, hInstance, 0);
+	SendMessage(mm_mod_info_vehicle_header, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	mm_mod_info_vehicle_data = CreateWindowEx(0, WC_STATIC, _TEXT("-"), WS_CHILD | WS_VISIBLE | SS_LEFT, 80, 530, 350, 25, mmWindow, 0, hInstance, 0);
+	SendMessage(mm_mod_info_vehicle_data, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
 	// enabled info
-	mm_mod_info_enabled_header = CreateWindowEx(0, WC_STATIC, _TEXT("Enabled:"), WS_CHILD | WS_VISIBLE | SS_LEFT, 20, 530, 50, 25, mmWindow, 0, hInstance, 0);
+	mm_mod_info_enabled_header = CreateWindowEx(0, WC_STATIC, _TEXT("Enabled:"), WS_CHILD | WS_VISIBLE | SS_LEFT, 20, 550, 50, 25, mmWindow, 0, hInstance, 0);
 	SendMessage(mm_mod_info_enabled_header, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
 
-	mm_mod_info_enabled_data = CreateWindowEx(0, WC_STATIC, _TEXT("-"), WS_CHILD | WS_VISIBLE | SS_LEFT, 80, 530, 350, 25, mmWindow, 0, hInstance, 0);
+	mm_mod_info_enabled_data = CreateWindowEx(0, WC_STATIC, _TEXT("-"), WS_CHILD | WS_VISIBLE | SS_LEFT, 80, 550, 350, 25, mmWindow, 0, hInstance, 0);
 	SendMessage(mm_mod_info_enabled_data, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
 
 	// file list info
@@ -196,6 +206,7 @@ void mm_update_mod_information(mm_mod_item* mod_item)
 		Static_SetText(mm_mod_info_name_data, "-");
 		Static_SetText(mm_mod_info_size_data, "-");
 		Static_SetText(mm_mod_info_file_count_data, "-");
+		Static_SetText(mm_mod_info_vehicle_data, "-");
 		Static_SetText(mm_mod_info_enabled_data, "-");
 
 		SendMessage(mm_mod_info_file_list_data, LB_RESETCONTENT, 0, 0);
@@ -213,6 +224,8 @@ void mm_update_mod_information(mm_mod_item* mod_item)
 	sprintf(fileInfo, "%u", mod_item->file_count);
 	Static_SetText(mm_mod_info_file_count_data, fileInfo);
 
+	Static_SetText(mm_mod_info_vehicle_data, (mod_item->vehicle != NULL ? mod_item->vehicle->name : "-"));
+
 	Static_SetText(mm_mod_info_enabled_data, (mod_item->enabled ? "Yes" : "No"));
 
 	// List mod files
@@ -223,7 +236,7 @@ void mm_update_mod_information(mm_mod_item* mod_item)
 		mm_mod_file *file = mod_item->files[i];
 
 		// Show game files only.
-		if ((file->flags & FFLAG_GAME_FILE) == 0)
+		if ((file->flags & FFLAG_MOD_FILE) == 0)
 			continue;
 
 		SendMessage(mm_mod_info_file_list_data, LB_ADDSTRING, 0, (LPARAM)file->name);

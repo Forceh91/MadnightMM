@@ -96,7 +96,7 @@ bool mm_extractor_scan(mm_mod_item *mod)
 	default:
 		return false;
 	}
-
+	
 	CComPtr<IInArchive> archive;
 	HRESULT hr = CreateObject(guid, &IID_IInArchive, (void **)&archive);
 
@@ -123,7 +123,7 @@ bool mm_extractor_scan(mm_mod_item *mod)
 	// Create storage for the file list.
 	mod->item_count = (fileCount < 255 ? (unsigned char)fileCount : 255);
 	mod->files = new mm_mod_file*[mod->item_count];
-
+	
 	for (UInt32 i = 0; i < fileCount; ++i)
 	{
 		if (i >= mod->item_count)
@@ -151,10 +151,15 @@ bool mm_extractor_scan(mm_mod_item *mod)
 
 		mod->files[i] = mm_create_mod_file((unsigned char)i, path, directory);
 
-		if (!directory)
+		if ((mod->files[i]->flags & FFLAG_MOD_FILE) != 0)
+		{
 			mod->file_count++;
-	}
 
+			if (mod->vehicle == NULL)
+				mod->vehicle = mod->files[i]->vehicle;
+		}
+	}
+	
 	archive->Close();
 	return true;
 }

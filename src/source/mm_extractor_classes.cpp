@@ -145,18 +145,3 @@ STDMETHODIMP_(ULONG) ArchiveOpenCallback::Release()
 
 	return res;
 }
-
-STDMETHODIMP ArchiveOpenCallback::SetTotal(const UInt64* files, const UInt64* bytes)
-{
-	return S_OK;
-}
-
-STDMETHODIMP ArchiveOpenCallback::SetCompleted(const UInt64* files, const UInt64* bytes)
-{
-	return S_OK;
-}
-
-STDMETHODIMP ArchiveOpenCallback::CryptoGetTextPassword(BSTR* password)
-{
-	return E_ABORT;
-}

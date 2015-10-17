@@ -144,4 +144,3 @@ void mm_mod_list_handle_item_change(LPNMLISTVIEW lParam)
 		mm_update_mod_information(mmSelectedModItem);
 	}
 }
-

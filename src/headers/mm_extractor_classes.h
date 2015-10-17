@@ -15,7 +15,7 @@
 class InStreamWrapper : public IInStream, public IStreamGetSize
 {
 public:
-	InStreamWrapper(const CComPtr<IStream> &s) : refCount(0), stream(s) {}
+	InStreamWrapper(const CComPtr<IStream> &s) { refCount = 0; stream = s; }
 	virtual ~InStreamWrapper() {}
 
 	STDMETHOD(QueryInterface)(REFIID iid, void **object);
@@ -33,15 +33,15 @@ private:
 class ArchiveOpenCallback : public IArchiveOpenCallback, public ICryptoGetTextPassword
 {
 public:
-	ArchiveOpenCallback() : refCount(0) {}
+	ArchiveOpenCallback() { refCount = 0; }
 	virtual ~ArchiveOpenCallback() {}
 
 	STDMETHOD(QueryInterface)(REFIID iid, void **object);
 	STDMETHOD_(ULONG, AddRef)();
 	STDMETHOD_(ULONG, Release)();
-	STDMETHOD(SetTotal)(const UInt64 *files, const UInt64 *bytes);
-	STDMETHOD(SetCompleted)(const UInt64 *files, const UInt64 *bytes);
-	STDMETHOD(CryptoGetTextPassword)(BSTR *password);
+	STDMETHOD(SetTotal)(const UInt64 *files, const UInt64 *bytes) { return S_OK; }
+	STDMETHOD(SetCompleted)(const UInt64 *files, const UInt64 *bytes) { return S_OK; }
+	STDMETHOD(CryptoGetTextPassword)(BSTR *password) { return E_ABORT; }
 
 private:
 	long refCount;

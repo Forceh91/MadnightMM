@@ -1,6 +1,7 @@
 #include <Windows.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "mm_mod_item.h"
 #include "mm_extractor.h"
 #include "mm_utils.h"
@@ -66,6 +67,88 @@ void mm_destroy_mod_item(mm_mod_item *item)
 	delete item;
 }
 
+static void mm_parse_livery_file(mm_mod_file *file)
+{
+	char vehicle[4], name[128];
+	char *livery = NULL, *quality = NULL;
+	unsigned char livery_index = 0xFF;
+	
+	mm_str_cpy(name, file->name, sizeof(name));
+	mm_str_cpy(vehicle, name, sizeof(vehicle));
+
+	size_t len = strlen(name);
+	bool is_numeric = true;
+
+	// Ignore the extension.
+	while (--len)
+	{
+		if (name[len] == '.')
+		{
+			name[len] = '\0';
+			break;
+		}
+	}
+
+	if (len == 0)
+		return;
+
+	// Try to look for the livery ID.
+	while (--len)
+	{
+		char c = name[len];
+
+		if (c == '_')
+		{
+			name[len] = '\0';
+			break;
+		}
+
+		livery = &name[len];
+		is_numeric = (is_numeric && c >= '0' && c <= '9');
+	}
+
+	if (!is_numeric || livery == NULL || len == 0)
+	{
+		// The file is not a valid livery file because it does not define the livery index at the end of the name.
+		return;
+	}
+
+	// Try to look for the quality definition.
+	while (--len)
+	{
+		char c = name[len];
+
+		if (c == '_')
+			break;
+
+		quality = &name[len];
+	}
+
+	if (quality == NULL)
+	{
+		// Quality has not been defined, ignore the file.
+		return;
+	}
+
+	file->livery = (unsigned char)atoi(livery);
+
+	if (strcmp(quality, "high") == 0)
+		file->flags |= FFLAG_QUALITY_HIGH;
+
+	file->flags |= FFLAG_TEXTURE_LIVERY;
+	file->vehicle = mm_get_vehicle_data(vehicle);
+}
+
+static void mm_parse_interior_file(mm_mod_file *file)
+{
+	char vehicle[4];
+
+	mm_str_cpy(vehicle, &file->name[4], sizeof(vehicle));
+
+	file->flags |= FFLAG_TEXTURE_INTERIOR;
+	file->vehicle = mm_get_vehicle_data(vehicle);
+}
+
 mm_mod_file *mm_create_mod_file(unsigned char index, const char *file, bool directory)
 {
 	mm_mod_file *mod_file = new mm_mod_file();
@@ -96,9 +179,29 @@ mm_mod_file *mm_create_mod_file(unsigned char index, const char *file, bool dire
 		name = file;
 	}
 
-	mod_file->name = new char[len + 1];
-	strncpy(mod_file->name, name, len);
-	mod_file->name[len] = '\0';
+	mod_file->name = new char[++len];
+	mm_str_cpy(mod_file->name, name, len);
+
+	// If the file is a game file, figure out its type.
+	if ((mod_file->flags & FFLAG_GAME_FILE) != 0)
+	{
+		if (strncmp(mod_file->name, "int_", 4) == 0)
+		{
+			// File is likely an interior.
+			mm_parse_interior_file(mod_file);
+		}
+		else
+		{
+			// File is likely a livery.
+			mm_parse_livery_file(mod_file);
+		}
+
+		// Make sure the vehicle data is valid. If not, the file is not a mod file we support at the moment.
+		if (mod_file->vehicle == NULL)
+		{
+			mod_file->flags &= ~FFLAG_MOD_FILE;
+		}
+	}
 
 	return mod_file;
 }
