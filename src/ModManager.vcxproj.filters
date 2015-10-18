@@ -51,13 +51,10 @@
     <ClCompile Include="source\mm_mod_item.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\mm_extractor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="source\mm_extractor_classes.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="source\mm_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\mm_mod_archive.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -72,9 +69,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="headers\mm_mod_list.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="headers\mm_extractor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="libraries\7-Zip\C\Types.h">
@@ -116,10 +110,10 @@
     <ClInclude Include="libraries\7-Zip\CPP\Common\Types.h">
       <Filter>Libraries\7-Zip\CPP\Common</Filter>
     </ClInclude>
-    <ClInclude Include="headers\mm_extractor_classes.h">
+    <ClInclude Include="headers\mm_utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="headers\mm_utils.h">
+    <ClInclude Include="headers\mm_mod_archive.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

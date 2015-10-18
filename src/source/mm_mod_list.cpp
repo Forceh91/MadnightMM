@@ -5,6 +5,7 @@
 
 #include "mm_mod_list.h"
 #include "mm_controls.h"
+#include "mm_mod_archive.h"
 
 #define MAX_MOD_FILES 1000
 
@@ -139,7 +140,7 @@ void mm_mod_list_handle_item_change(LPNMLISTVIEW lParam)
 		mm_mod_item* mmSelectedModItem = mm_mod_item_list[index];
 		if (!mmSelectedModItem)
 			return;
-		
+
 		// update the mod info
 		mm_update_mod_information(mmSelectedModItem);
 	}

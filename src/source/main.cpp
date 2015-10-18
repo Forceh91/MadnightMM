@@ -3,7 +3,7 @@
 #include <direct.h>
 
 #include "mm_window.h"
-#include "mm_extractor.h"
+#include "mm_mod_archive.h"
 
 bool mm_is_running = false;
 TCHAR mm_app_data_loc[MAX_PATH] = { 0 };
@@ -24,7 +24,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		return 0;
 
 	// initialize 7-zip.
-	mm_extractor_initialize("./7z.dll");
+	ModArchive::Initialize("./7z.dll");
 
 	// running
 	mm_is_running = true;
@@ -40,7 +40,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		DispatchMessage(&msg);
 	}
 
-	mm_extractor_shutdown();
+	ModArchive::Shutdown();
 
 	// all done
 	return (int)(msg.wParam);

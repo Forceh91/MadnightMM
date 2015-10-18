@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "mm_mod_item.h"
-#include "mm_extractor.h"
+#include "mm_mod_archive.h"
 #include "mm_utils.h"
 
 mm_mod_item *mm_create_mod_item(const char *path, const char *file)
@@ -44,12 +44,15 @@ mm_mod_item *mm_create_mod_item(const char *path, const char *file)
 	item->mod_name[len2 - 1] = '\0';
 
 	// do some other shit (such as figuring out what files go in it)
-	if (!mm_extractor_scan(item))
+	ModArchive *archive = new ModArchive(item);
+
+	if (!archive->Scan())
 	{
 		mm_destroy_mod_item(item);
-		return NULL;
+		item = NULL;
 	}
-
+	
+	archive->Release();
 	return item;
 }
 
@@ -58,13 +61,23 @@ void mm_destroy_mod_item(mm_mod_item *item)
 	if (item->mod_name != NULL) delete[] item->mod_name;
 	if (item->file_path != NULL) delete[] item->file_path;
 
+	mm_destroy_mod_item_files(item);
+	
+	delete item;
+}
+
+void mm_destroy_mod_item_files(mm_mod_item *item)
+{
 	for (int i = 0; i < item->item_count; ++i)
 	{
 		mm_destroy_mod_file(item->files[i]);
 	}
 
 	delete[] item->files;
-	delete item;
+	item->files = NULL;
+
+	item->item_count = 0;
+	item->file_count = 0;
 }
 
 static void mm_parse_livery_file(mm_mod_file *file)
@@ -212,4 +225,33 @@ void mm_destroy_mod_file(mm_mod_file *file)
 	if (file->path != NULL) delete[] file->path;
 
 	delete file;
+}
+
+void mm_get_mod_file_path(mm_mod_file *file, char *buffer, size_t buflen, const char *base_path /* = NULL */, bool include_file /* = true */)
+{
+	if ((file->flags & FFLAG_TEXTURE_LIVERY) != 0)
+	{
+		// File is a car livery.
+		sprintf_s(buffer, buflen, "%s\\cars\\models\\%s\\livery_%02u\\textures_%s\\%s",
+			(base_path ? base_path : ""),
+			file->vehicle->short_name,
+			file->livery,
+			((file->flags & FFLAG_QUALITY_HIGH) != 0 ? "high" : "low"),
+			(include_file ? file->name : ""));
+	}
+
+	else if ((file->flags & FFLAG_TEXTURE_INTERIOR) != 0)
+	{
+		// File is a car interior
+		sprintf_s(buffer, buflen, "%s\\cars\\interiors\\models\\%s\\%s",
+			(base_path ? base_path : ""),
+			file->vehicle->short_name,
+			(include_file ? file->name : ""));
+	}
+
+	else
+	{
+		// Someone passed this function a file that's not part of the mod, return the base path.
+		sprintf_s(buffer, buflen, "%s\\", (base_path ? base_path : ""));
+	}
 }

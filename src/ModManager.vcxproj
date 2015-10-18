@@ -21,16 +21,14 @@
   <ItemGroup>
     <ClCompile Include="source\mm_controls.cpp" />
     <ClCompile Include="source\main.cpp" />
-    <ClCompile Include="source\mm_extractor.cpp" />
-    <ClCompile Include="source\mm_extractor_classes.cpp" />
+    <ClCompile Include="source\mm_mod_archive.cpp" />
     <ClCompile Include="source\mm_mod_item.cpp" />
     <ClCompile Include="source\mm_mod_list.cpp" />
     <ClCompile Include="source\mm_utils.cpp" />
     <ClCompile Include="source\mm_window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="headers\mm_extractor.h" />
-    <ClInclude Include="headers\mm_extractor_classes.h" />
+    <ClInclude Include="headers\mm_mod_archive.h" />
     <ClInclude Include="headers\mm_mod_item.h" />
     <ClInclude Include="headers\mm_mod_list.h" />
     <ClInclude Include="headers\mm_utils.h" />

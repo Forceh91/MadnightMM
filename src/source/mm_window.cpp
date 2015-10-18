@@ -28,7 +28,7 @@ LRESULT CALLBACK mm_wnd_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			{
 				case LVN_ITEMCHANGED:
 					mm_mod_list_handle_item_change((LPNMLISTVIEW)lParam);
-				break;
+					break;
 			}
 		break;
 		case WM_CLOSE:

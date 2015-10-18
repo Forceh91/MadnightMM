@@ -39,8 +39,8 @@ typedef struct _mm_mod_item
 	char *file_path; // file path to the mod
 	unsigned int file_size; // the size of this mod
 	unsigned char file_format; // the format of the mod file archive (see ModFileFormat above)
-	unsigned char file_count; // the number of files inside the mod archive
-	unsigned char item_count; // the number of files and directories inside the mod archive
+	unsigned char file_count; // the number of mod files inside the mod archive
+	unsigned char item_count; // the number of all files and directories inside the mod archive
 	mm_vehicle_data *vehicle; // data of the vehicle this mod alters
 	mm_mod_file **files; // an array containing info about each file and directory inside the mod, length item_count
 
@@ -49,8 +49,10 @@ typedef struct _mm_mod_item
 
 mm_mod_item *mm_create_mod_item(const char *path, const char *file);
 void mm_destroy_mod_item(mm_mod_item *item);
+void mm_destroy_mod_item_files(mm_mod_item *item);
 
 mm_mod_file *mm_create_mod_file(unsigned char index, const char *file, bool directory);
 void mm_destroy_mod_file(mm_mod_file *file);
+void mm_get_mod_file_path(mm_mod_file *file, char *buffer, size_t buflen, const char *base_path = 0, bool include_file = true);
 
 #endif
