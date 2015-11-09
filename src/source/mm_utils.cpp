@@ -84,6 +84,15 @@ void mm_str_cpy(char *dest, const char *src, size_t size)
 	*dest = '\0';
 }
 
+char *mm_str_duplicate(const char *text)
+{
+	size_t len = strlen(text) + 1;
+	char *str = new char[len];
+	mm_str_cpy(str, text, len);
+
+	return str;
+}
+
 mm_vehicle_data *mm_get_vehicle_data(const char *short_name)
 {
 	unsigned int index;

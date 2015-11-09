@@ -33,6 +33,7 @@ const char *mm_get_file_extension(const char *file, size_t length = 0);
 const char *mm_get_token_from_end(const char *str, char token, size_t length = 0);
 
 void mm_str_cpy(char *dest, const char *src, size_t size);
+char *mm_str_duplicate(const char *text);
 
 mm_vehicle_data *mm_get_vehicle_data(const char *short_name);
 

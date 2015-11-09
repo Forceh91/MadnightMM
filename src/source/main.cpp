@@ -4,6 +4,7 @@
 
 #include "mm_window.h"
 #include "mm_mod_archive.h"
+#include "mm_mod_installer.h"
 
 bool mm_is_running = false;
 TCHAR mm_app_data_loc[MAX_PATH] = { 0 };
@@ -18,6 +19,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	_tcscpy(temp_dir, mm_app_data_loc);
 	_tcscat(temp_dir, _TEXT("/Madnight Software/MadnightMM"));
 	_tmkdir(temp_dir);
+
+	// load a list of previously installed mods
+	mm_load_installed_mod_list();
 
 	// create our window
 	if (!mm_create_window(hInstance, hPrevInstance, lpCmdLine))
@@ -41,6 +45,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	ModArchive::Shutdown();
+
+	// cleanup memory allocated for the installed mod list cache
+	mm_cleanup_installed_mods();
 
 	// all done
 	return (int)(msg.wParam);
