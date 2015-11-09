@@ -35,4 +35,6 @@ void mm_str_cpy(char *dest, const char *src, size_t size);
 
 mm_vehicle_data *mm_get_vehicle_data(const char *short_name);
 
+unsigned int mm_calculate_file_crc32(const char *file);
+
 #endif

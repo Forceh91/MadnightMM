@@ -53,6 +53,10 @@ mm_mod_item *mm_create_mod_item(const char *path, const char *file)
 	}
 	
 	archive->Release();
+
+	// Calculate a CRC32 for the mod archive so we can verify whether it has been updated in the future.
+	item->file_crc = mm_calculate_file_crc32(item->file_path);
+
 	return item;
 }
 

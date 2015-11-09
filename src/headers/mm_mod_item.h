@@ -38,6 +38,7 @@ typedef struct _mm_mod_item
 	bool enabled; // whether or not it is enabled
 	char *file_path; // file path to the mod
 	unsigned int file_size; // the size of this mod
+	unsigned int file_crc; // CRC32 of the entire archive
 	unsigned char file_format; // the format of the mod file archive (see ModFileFormat above)
 	unsigned char file_count; // the number of mod files inside the mod archive
 	unsigned char item_count; // the number of all files and directories inside the mod archive
