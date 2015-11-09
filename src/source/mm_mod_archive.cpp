@@ -3,7 +3,6 @@
 #include <Windows.h>
 #include <initguid.h>
 #include <Shlwapi.h>
-#include <Shlobj.h>
 #include <stdio.h>
 
 // GUIDs for file formats supported by 7-zip.
@@ -105,7 +104,7 @@ bool ModArchive::Scan()
 	return ScanFiles();
 }
 
-bool ModArchive::Extract(const char *targetFolder)
+bool ModArchive::Extract(const char *targetFolder, ExtractCallback callback)
 {
 	if (targetFolder == NULL ||
 		*targetFolder == 0)
@@ -143,6 +142,9 @@ bool ModArchive::Extract(const char *targetFolder)
 		if ((mod->files[i]->flags & FFLAG_MOD_FILE) != 0)
 			indices[j++] = i;
 	}
+
+	// Use this callback to back up any files that would be overwritten.
+	extractCallback = callback;
 
 	// Now extract the files into the given folder.
 	bool succeeded = (archive->Extract(indices, mod->file_count, 0, this) == S_OK);
@@ -353,17 +355,16 @@ STDMETHODIMP ModArchive::GetStream(UInt32 index, ISequentialOutStream** outStrea
 
 	mm_mod_file *modFile = mod->files[index];
 
+	// Call the extract callback, which should take care of backing up the original file if necessary.
+	if (extractCallback != NULL)
+		extractCallback(mod, modFile);
+
 	// Figure out where this particular file should go.
 	char filePath[MAX_PATH];
 	mm_get_mod_file_path(modFile, filePath, sizeof(filePath), extractPath, false);
 
-	DWORD attrib = GetFileAttributes(filePath);
-
-	if (attrib == INVALID_FILE_ATTRIBUTES || (attrib & FILE_ATTRIBUTE_DIRECTORY) == 0)
-	{
-		// If the entire path for the mod file doesn't exist yet, create it.
-		SHCreateDirectoryEx(NULL, filePath, NULL);
-	}
+	// Make sure the target folder exists.
+	mm_ensure_folder_exists(filePath);
 
 	// Get the complete path for the file to be extracted.
 	mm_get_mod_file_path(modFile, filePath, sizeof(filePath), extractPath);

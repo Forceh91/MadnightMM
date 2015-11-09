@@ -6,6 +6,7 @@ typedef struct _mm_mod_item mm_mod_item;
 
 typedef struct _mm_installed_file
 {
+	char *file_name;
 	char vehicle_short[4]; // the vehicle this file modifies (short name)
 	unsigned char flags; // mod file flags (see ModFileFlags in mm_mod_item.h)
 	unsigned char livery; // index of the livery
@@ -26,7 +27,7 @@ void mm_load_installed_mod_list(void);
 void mm_save_installed_mod_list(void);
 
 bool mm_is_mod_installed(mm_mod_item *mod);
-void mm_install_mod(mm_mod_item *mod);
-void mm_uninstall_mod(mm_mod_item *mod);
+bool mm_install_mod(mm_mod_item *mod);
+bool mm_uninstall_mod(mm_mod_item *mod);
 
 #endif

@@ -55,5 +55,6 @@ void mm_destroy_mod_item_files(mm_mod_item *item);
 mm_mod_file *mm_create_mod_file(unsigned char index, const char *file, bool directory);
 void mm_destroy_mod_file(mm_mod_file *file);
 void mm_get_mod_file_path(mm_mod_file *file, char *buffer, size_t buflen, const char *base_path = 0, bool include_file = true);
+void mm_get_mod_file_path(const char *file_name, const char *vehicle_name_short, unsigned char file_flags, unsigned char livery_index, char *buffer, size_t buflen, const char *base_path = 0, bool include_file = true);
 
 #endif

@@ -35,6 +35,9 @@ const char *mm_get_token_from_end(const char *str, char token, size_t length = 0
 void mm_str_cpy(char *dest, const char *src, size_t size);
 char *mm_str_duplicate(const char *text);
 
+void mm_ensure_folder_exists(const char *path);
+bool mm_file_exists(const char *path);
+
 mm_vehicle_data *mm_get_vehicle_data(const char *short_name);
 
 unsigned int mm_calculate_file_crc32(const char *file);

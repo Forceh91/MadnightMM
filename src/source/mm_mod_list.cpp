@@ -6,6 +6,7 @@
 #include "mm_mod_list.h"
 #include "mm_controls.h"
 #include "mm_mod_archive.h"
+#include "mm_mod_installer.h"
 
 #define MAX_MOD_FILES 1000
 
@@ -82,6 +83,16 @@ void mm_add_mod_item(mm_mod_item* modItem)
 
 	ListView_InsertItem(mm_mod_list, &listviewItem);
 
+	// toggle the checkbox if the mod has been installed
+	listviewItem = { 0 };
+	listviewItem.mask = LVIF_STATE;
+	listviewItem.state = modItem->enabled ? 0x2000 : 0x1000; // Cosmic magic constants from hell
+	listviewItem.stateMask = 0xF000;
+	listviewItem.iItem = freeModSlot;
+	listviewItem.iSubItem = MOD_LIST_COLUMN_ENABLED;
+
+	ListView_SetItem(mm_mod_list, &listviewItem);
+
 	// set the name
 	listviewItem = { 0 };
 	listviewItem.mask = LVIF_TEXT;
@@ -126,7 +137,14 @@ void mm_mod_list_handle_item_change(LPNMLISTVIEW lParam)
 			return;
 
 		// if it exists then we can toggle the enabled value of it
-		mmModItem->enabled = (isChecked == 0 ? false : true);
+		bool modEnabled = (isChecked != 0);
+
+		// The checkbox state has changed, install or uninstall the mod.
+		if (modEnabled != mmModItem->enabled && !scanning_mod_archives)
+		{
+			if (modEnabled) mm_install_mod(mmModItem);
+			else mm_uninstall_mod(mmModItem);
+		}
 
 		// check for selected item
 		int index = ListView_GetNextItem(hdr->hwndFrom, -1, LVNI_SELECTED);

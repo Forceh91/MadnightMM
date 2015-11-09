@@ -1,6 +1,7 @@
 #include "mm_mod_installer.h"
 #include "mm_mod_item.h"
 #include "mm_utils.h"
+#include "mm_mod_archive.h"
 #include <stdio.h>
 #include <string.h>
 #include <Windows.h>
@@ -61,28 +62,42 @@ inline void mm_write_string(FILE *f, const char *text)
 	fwrite(text, len, 1, f);
 }
 
+static bool mm_cleanup_installed_mod(unsigned int index)
+{
+	mm_installed_mod *mod = installed_mods[index];
+
+	if (mod == NULL)
+		return false;
+
+	for (unsigned int f = 0; f < mod->file_count; ++f)
+	{
+		if (mod->files[f].file_name != NULL) delete[] mod->files[f].file_name;
+	}
+
+	if (mod->file_path != NULL) delete[] mod->file_path;
+	if (mod->files != NULL) delete[] mod->files;
+	delete mod;
+
+	installed_mods[index] = NULL;
+	
+	return true;
+}
+
 void mm_cleanup_installed_mods(void)
 {
-	for (unsigned int i = 0, j = 0; j < num_installed_mods; ++i)
+	for (unsigned int i = 0, j = 0; i < MAX_INSTALLED_MODS && j < num_installed_mods; ++i)
 	{
-		if (installed_mods[i] == NULL)
-			continue;
-
-		mm_installed_mod *mod = installed_mods[i];
-
-		if (mod->file_path != NULL) delete[] mod->file_path;
-		if (mod->files != NULL) delete[] mod->files;
-		delete mod;
-
-		installed_mods[i] = NULL;
-		++j;
+		if (mm_cleanup_installed_mod(i))
+			++j;
 	}
+
+	num_installed_mods = 0;
 }
 
 void mm_load_installed_mod_list(void)
 {
 	// TODO: Load this file from wherever config files are stored?
-	const char *installed_mods_file = "./installed.dat";
+	const char *installed_mods_file = "D:\\Projects\\Muuta\\MadnightMM\\src\\x64\\Debug\\installed.dat";
 
 	FILE *file = fopen(installed_mods_file, "r");
 
@@ -113,6 +128,10 @@ void mm_load_installed_mod_list(void)
 
 		for (unsigned int f = 0; f < mod->file_count; ++f)
 		{
+			char file_name[MAX_PATH];
+			mm_read_string(file, file_name);
+			mod->files[f].file_name = mm_str_duplicate(file_name);
+
 			mm_read_string(file, mod->files[f].vehicle_short);
 			mod->files[f].flags = mm_read_uchar(file);
 			mod->files[f].livery = mm_read_uchar(file);
@@ -127,7 +146,7 @@ void mm_load_installed_mod_list(void)
 void mm_save_installed_mod_list(void)
 {
 	// TODO: Save this to wherever config files are stored?
-	const char *installed_mods_file = "./installed.dat";
+	const char *installed_mods_file = "D:\\Projects\\Muuta\\MadnightMM\\src\\x64\\Debug\\installed.dat";
 
 	FILE *file = fopen(installed_mods_file, "w");
 
@@ -156,6 +175,7 @@ void mm_save_installed_mod_list(void)
 		// Save a list of modified files.
 		for (unsigned int f = 0; f < mod->file_count; ++f)
 		{
+			mm_write_string(file, mod->files[f].file_name);
 			mm_write_string(file, mod->files[f].vehicle_short);
 			mm_write_uchar(file, mod->files[f].flags);
 			mm_write_uchar(file, mod->files[f].livery);
@@ -167,7 +187,7 @@ void mm_save_installed_mod_list(void)
 	fclose(file);
 }
 
-bool mm_is_mod_installed(mm_mod_item *mod)
+static mm_installed_mod *mm_find_installed_mod(mm_mod_item *mod, unsigned int *index = NULL)
 {
 	for (unsigned int i = 0, j = 0; j < num_installed_mods; ++i)
 	{
@@ -176,14 +196,163 @@ bool mm_is_mod_installed(mm_mod_item *mod)
 
 		mm_installed_mod *installed_mod = installed_mods[i];
 
-		if (_stricmp(mod->file_path, installed_mod->file_path) &&
+		if (_stricmp(mod->mod_name, installed_mod->file_path) == 0 &&
 			mod->file_crc == installed_mod->file_crc)
 		{
-			return true;
+			if (index != NULL)
+				*index = i;
+
+			return installed_mod;
 		}
-		
+
 		++j;
 	}
 
-	return false;
+	if (index != NULL)
+		*index = MAX_INSTALLED_MODS;
+
+	return NULL;
+}
+
+bool mm_is_mod_installed(mm_mod_item *mod)
+{
+	return (mm_find_installed_mod(mod) != NULL);
+}
+
+static unsigned int mm_find_free_mod_index(void)
+{
+	for (unsigned int i = 0; i < MAX_INSTALLED_MODS; ++i)
+	{
+		if (installed_mods[i] == NULL)
+			return i;
+	}
+
+	return MAX_INSTALLED_MODS;
+}
+
+static void __stdcall mm_backup_mod_file(mm_mod_item *mod, mm_mod_file *file)
+{
+	// TODO: Replace these!
+	const char *gamePath = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\DiRT Rally";
+	const char *backupPath = "D:\\Projects\\Muuta\\MadnightMM\\src\\x64\\Debug\\Backups"; // This has to be a complete path or it doesn't create the subfolders properly
+
+	// Figure out where this particular file should go.
+	char filePath[MAX_PATH];
+	mm_get_mod_file_path(file, filePath, sizeof(filePath), backupPath);
+
+	// If the file has been backed up already, don't do anything.
+	if (mm_file_exists(filePath))
+		return;
+
+	// Make sure the entire backup path exists.
+	char backupFileLocation[MAX_PATH];
+	mm_get_mod_file_path(file, backupFileLocation, sizeof(backupFileLocation), backupPath, false);
+
+	mm_ensure_folder_exists(backupFileLocation);
+
+	// Copy the file from the game folder.
+	char originalFile[MAX_PATH];
+	mm_get_mod_file_path(file, originalFile, sizeof(originalFile), gamePath);
+
+	CopyFile(originalFile, filePath, TRUE);
+}
+
+bool mm_install_mod(mm_mod_item *mod)
+{
+	// TODO: Need some sort of UI to locate the folder below. For now, this and the backup function above are using hardcoded paths.
+	const char *gamePath = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\DiRT Rally";
+	
+	// Make sure we're not overwriting our installed mod list. 1000 _should_ be safe, but you never know...
+	unsigned int mod_index = mm_find_free_mod_index();
+
+	if (mod_index == MAX_INSTALLED_MODS)
+		return false;
+
+	// Open the mod archive and extract it to the game folder. Our callback function will take care of backing up original files.
+	ModArchive *archive = new ModArchive(mod);
+
+	bool result = archive->Extract(gamePath, mm_backup_mod_file);
+	archive->Release();
+
+	if (result)
+	{
+		// Mod was installed successfully, add it to the installed mod list.
+		mm_installed_mod *inst_mod = new mm_installed_mod;
+
+		inst_mod->file_path = mm_str_duplicate(mod->mod_name);
+		inst_mod->file_crc = mod->file_crc;
+		inst_mod->file_count = mod->file_count;
+
+		inst_mod->files = new mm_installed_file[mod->file_count];
+
+		for (unsigned int i = 0, j = 0; i < mod->item_count && j < mod->file_count; ++i)
+		{
+			if ((mod->files[i]->flags & FFLAG_MOD_FILE) == 0)
+				continue;
+
+			inst_mod->files[j].file_name = mm_str_duplicate(mod->files[i]->name);
+
+			mm_str_cpy(inst_mod->files[j].vehicle_short, mod->files[i]->vehicle->short_name, sizeof(inst_mod->files[i].vehicle_short));
+			inst_mod->files[j].flags = mod->files[i]->flags;
+			inst_mod->files[j].livery = mod->files[i]->livery;
+
+			++j;
+		}
+
+		installed_mods[mod_index] = inst_mod;
+		num_installed_mods++;
+
+		// Save the installed mod list.
+		mm_save_installed_mod_list();
+
+		mod->enabled = true;
+	}
+
+	return result;
+}
+
+bool mm_uninstall_mod(mm_mod_item *mod)
+{
+	// TODO: Need to replace these as well!
+	const char *gamePath = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\DiRT Rally";
+	const char *backupPath = "D:\\Projects\\Muuta\\MadnightMM\\src\\x64\\Debug\\Backups";
+
+	unsigned int mod_index;
+	mm_installed_mod *installed = mm_find_installed_mod(mod, &mod_index);
+
+	if (installed == NULL)
+	{
+		// Can't find install data for this mod, so we can't uninstall it either!
+		return false;
+	}
+
+	for (unsigned int i = 0; i < installed->file_count; ++i)
+	{
+		mm_installed_file &mod_file = installed->files[i];
+
+		// Figure out where the backed up file would be.
+		char filePath[MAX_PATH];
+		mm_get_mod_file_path(mod_file.file_name, mod_file.vehicle_short, mod_file.flags, mod_file.livery, filePath, sizeof(filePath), backupPath, true);
+
+		// If the backed up file doesn't exist for some reason (user has been messing with our backups?), don't do anything. (or maybe show the user a warning?)
+		if (!mm_file_exists(filePath))
+			continue;
+
+		// The restore path should exists as we're restoring the file into the game folder. Format the full file path for restoration.
+		char restorePath[MAX_PATH];
+		mm_get_mod_file_path(mod_file.file_name, mod_file.vehicle_short, mod_file.flags, mod_file.livery, restorePath, sizeof(restorePath), gamePath, true);
+
+		// Copy the file back into the game folder.
+		CopyFile(filePath, restorePath, FALSE);
+	}
+
+	mm_cleanup_installed_mod(mod_index);
+	num_installed_mods--;
+
+	mod->enabled = false;
+
+	// Save the installed mod list.
+	mm_save_installed_mod_list();
+
+	return true;
 }

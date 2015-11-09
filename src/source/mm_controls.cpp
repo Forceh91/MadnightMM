@@ -28,6 +28,8 @@ HWND mm_mod_info_file_count_data = { 0 };
 HWND mm_mod_info_file_list_header = { 0 };
 HWND mm_mod_info_file_list_data = { 0 };
 
+bool scanning_mod_archives = false;
+
 void mm_create_controls(HWND mmWindow, HINSTANCE hInstance)
 {
 	mm_mod_location_group = CreateWindowEx(0, WC_BUTTON, _TEXT("Mod Listings"), BS_GROUPBOX | WS_GROUP | WS_CHILD | WS_VISIBLE, 10, 10, 750, 430, mmWindow, 0, hInstance, 0);
@@ -165,6 +167,9 @@ static int CALLBACK mm_control_mod_browser_handler(HWND hWnd, UINT message, LPAR
 
 void mm_handle_mod_directory_found(HWND hWnd, TCHAR* filePath)
 {
+	// Global state so we can ignore stuff when windows sends bs messages during list view initialization.
+	scanning_mod_archives = true;
+
 	// clear the mod list
 	mm_clear_mod_list();
 
@@ -196,6 +201,8 @@ void mm_handle_mod_directory_found(HWND hWnd, TCHAR* filePath)
 		FindClose(hFind);
 	}
 #endif
+
+	scanning_mod_archives = false;
 }
 
 void mm_update_mod_information(mm_mod_item* mod_item)

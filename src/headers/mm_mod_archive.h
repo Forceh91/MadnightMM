@@ -10,6 +10,8 @@
 typedef struct _GUID GUID;
 typedef unsigned int(__stdcall *CreateObjectFunc)(const GUID *clsID, const GUID *interfaceID, void **outObject);
 
+typedef void (__stdcall *ExtractCallback)(mm_mod_item *mod, mm_mod_file *file);
+
 //
 // ModArchive
 //
@@ -25,7 +27,7 @@ public:
 	bool IsOpen() const { return (stream != NULL); }
 
 	bool Scan();
-	bool Extract(const char *targetFolder);
+	bool Extract(const char *targetFolder, ExtractCallback callback = NULL);
 
 	// IUnknown
 	STDMETHOD(QueryInterface)(REFIID iid, void **object);
@@ -60,6 +62,7 @@ private:
 	IInArchive *archive;
 
 	char *extractPath;
+	ExtractCallback extractCallback;
 };
 
 //

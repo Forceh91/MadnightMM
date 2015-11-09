@@ -11,6 +11,8 @@ typedef enum _MMControls
 	MM_CONTROL_MOD_FILE_LIST
 } MMControls;
 
+extern bool scanning_mod_archives;
+
 void mm_create_controls(HWND mmWindow, HINSTANCE hInstance);
 void mm_control_handler(HWND mmWindow, WPARAM wParam);
 

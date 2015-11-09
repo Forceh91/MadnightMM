@@ -1,6 +1,8 @@
 #include "mm_utils.h"
 #include <string.h>
 #include <stdio.h>
+#include <Shlwapi.h>
+#include <Shlobj.h>
 
 static mm_vehicle_data vehicles[] = {
 	{ "6rb", "MG Metro 6R4", CLASS_GRB },
@@ -91,6 +93,30 @@ char *mm_str_duplicate(const char *text)
 	mm_str_cpy(str, text, len);
 
 	return str;
+}
+
+void mm_ensure_folder_exists(const char *path)
+{
+	DWORD attrib = GetFileAttributes(path);
+
+	if (attrib == INVALID_FILE_ATTRIBUTES || (attrib & FILE_ATTRIBUTE_DIRECTORY) == 0)
+	{
+		// If the entire path doesn't exist yet, create it.
+		SHCreateDirectoryEx(NULL, path, NULL);
+	}
+}
+
+bool mm_file_exists(const char *path)
+{
+	FILE *f = fopen(path, "r");
+
+	if (f != NULL)
+	{
+		fclose(f);
+		return true;
+	}
+
+	return false;
 }
 
 mm_vehicle_data *mm_get_vehicle_data(const char *short_name)
