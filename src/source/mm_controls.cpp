@@ -9,6 +9,9 @@
 #include "mm_controls.h"
 #include "mm_utils.h"
 
+extern char gamePath[MAX_PATH];
+extern char backupPath[MAX_PATH];
+
 HWND mm_mod_location_group = { 0 };
 HWND mm_mod_location_label = { 0 };
 HWND mm_mod_location_browse_button = { 0 };
@@ -27,6 +30,7 @@ HWND mm_mod_info_file_count_header = { 0 };
 HWND mm_mod_info_file_count_data = { 0 };
 HWND mm_mod_info_file_list_header = { 0 };
 HWND mm_mod_info_file_list_data = { 0 };
+
 HWND mm_directory_info_group = { 0 };
 HWND mm_game_location_label = { 0 };
 HWND mm_game_location_browse_button = { 0 };
@@ -193,6 +197,7 @@ void mm_control_handler(HWND mmWindow, WPARAM wParam)
 				// get the folder we chose and set the label
 				SHGetPathFromIDList(lpItemIDList, filePath);
 				SetDlgItemText(mmWindow, MM_CONTROL_GAME_DIR_LOCATION_LABEL, filePath);
+				mm_str_cpy(gamePath, filePath, sizeof(gamePath));
 
 				// free memory
 				CoTaskMemFree(lpItemIDList);
@@ -226,6 +231,7 @@ void mm_control_handler(HWND mmWindow, WPARAM wParam)
 				// get the folder we chose and set the label
 				SHGetPathFromIDList(lpItemIDList, filePath);
 				SetDlgItemText(mmWindow, MM_CONTROL_BACKUP_DIR_LOCATION_LABEL, filePath);
+				mm_str_cpy(backupPath, filePath, sizeof(backupPath));
 
 				// free memory
 				CoTaskMemFree(lpItemIDList);

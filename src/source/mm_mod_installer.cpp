@@ -15,6 +15,12 @@
 
 static mm_installed_mod *installed_mods[MAX_INSTALLED_MODS];
 static unsigned int num_installed_mods;
+
+// TODO: Store these into a config file and load them in when the app loads
+char gamePath[MAX_PATH] = { 0 };
+char backupPath[MAX_PATH] = { 0 };
+char installed_mods_file[MAX_PATH] = { 0 };
+
 extern TCHAR mm_app_data_loc[MAX_PATH];
 
 //
@@ -98,8 +104,11 @@ void mm_cleanup_installed_mods(void)
 
 void mm_load_installed_mod_list(void)
 {
-	const char *installed_mods_file = _tcscat(mm_app_data_loc, _TEXT("\\installed.dat"));
-
+	if (!*installed_mods_file) {
+		_tcscat(installed_mods_file, mm_app_data_loc);
+		_tcscat(installed_mods_file, _TEXT("\\installed.dat"));
+	}
+	
 	FILE *file = fopen(installed_mods_file, "r");
 
 	// No mods have been installed previously.
@@ -146,7 +155,10 @@ void mm_load_installed_mod_list(void)
 
 void mm_save_installed_mod_list(void)
 {
-	const char *installed_mods_file = _tcscat(mm_app_data_loc, _TEXT("\\installed.dat"));
+	if (!*installed_mods_file) {
+		_tcscat(installed_mods_file, mm_app_data_loc);
+		_tcscat(installed_mods_file, _TEXT("\\installed.dat"));
+	}
 
 	FILE *file = fopen(installed_mods_file, "w");
 
@@ -232,10 +244,6 @@ static unsigned int mm_find_free_mod_index(void)
 
 static void __stdcall mm_backup_mod_file(mm_mod_item *mod, mm_mod_file *file)
 {
-	// TODO: Replace these!
-	const char *gamePath = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\DiRT Rally";
-	const char *backupPath = "D:\\Projects\\Muuta\\MadnightMM\\src\\x64\\Debug\\Backups"; // This has to be a complete path or it doesn't create the subfolders properly
-
 	// Figure out where this particular file should go.
 	char filePath[MAX_PATH];
 	mm_get_mod_file_path(file, filePath, sizeof(filePath), backupPath);
@@ -259,9 +267,6 @@ static void __stdcall mm_backup_mod_file(mm_mod_item *mod, mm_mod_file *file)
 
 bool mm_install_mod(mm_mod_item *mod)
 {
-	// TODO: Need some sort of UI to locate the folder below. For now, this and the backup function above are using hardcoded paths.
-	const char *gamePath = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\DiRT Rally";
-	
 	// Make sure we're not overwriting our installed mod list. 1000 _should_ be safe, but you never know...
 	unsigned int mod_index = mm_find_free_mod_index();
 
@@ -313,10 +318,6 @@ bool mm_install_mod(mm_mod_item *mod)
 
 bool mm_uninstall_mod(mm_mod_item *mod)
 {
-	// TODO: Need to replace these as well!
-	const char *gamePath = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\DiRT Rally";
-	const char *backupPath = "D:\\Projects\\Muuta\\MadnightMM\\src\\x64\\Debug\\Backups";
-
 	unsigned int mod_index;
 	mm_installed_mod *installed = mm_find_installed_mod(mod, &mod_index);
 

@@ -15,7 +15,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	SHGetSpecialFolderPath(0, mm_app_data_loc, CSIDL_APPDATA, false);
 
 	// create the directory where we will store stuff
-	TCHAR temp_dir[400] = { 0 };
 	_tcscat(mm_app_data_loc, _TEXT("\\Madnight Software\\MadnightMM"));
 	_tmkdir(mm_app_data_loc);
 
