@@ -2,6 +2,7 @@
 #include "mm_mod_item.h"
 #include "mm_utils.h"
 #include "mm_mod_archive.h"
+#include "mm_controls.h"
 #include <stdio.h>
 #include <string.h>
 #include <tchar.h>
@@ -248,6 +249,9 @@ static void __stdcall mm_backup_mod_file(mm_mod_item *mod, mm_mod_file *file)
 	char filePath[MAX_PATH];
 	mm_get_mod_file_path(file, filePath, sizeof(filePath), backupPath);
 
+	// show the file we're on
+	mm_update_installation_file(file->name);
+
 	// If the file has been backed up already, don't do anything.
 	if (mm_file_exists(filePath))
 		return;
@@ -272,6 +276,9 @@ bool mm_install_mod(mm_mod_item *mod)
 
 	if (mod_index == MAX_INSTALLED_MODS)
 		return false;
+
+	// show the install progress
+	mm_show_installation_progress(mod->file_count);
 
 	// Open the mod archive and extract it to the game folder. Our callback function will take care of backing up original files.
 	ModArchive *archive = new ModArchive(mod);
@@ -327,6 +334,9 @@ bool mm_uninstall_mod(mm_mod_item *mod)
 		return false;
 	}
 
+	// toggle the progress bar
+	mm_show_installation_progress(mod->file_count, false);
+
 	for (unsigned int i = 0; i < installed->file_count; ++i)
 	{
 		mm_installed_file &mod_file = installed->files[i];
@@ -345,6 +355,9 @@ bool mm_uninstall_mod(mm_mod_item *mod)
 
 		// Copy the file back into the game folder.
 		CopyFile(filePath, restorePath, FALSE);
+
+		// show the file we're on
+		mm_update_installation_file(mod_file.file_name);
 	}
 
 	mm_cleanup_installed_mod(mod_index);

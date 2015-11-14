@@ -30,6 +30,10 @@ HWND mm_mod_info_file_count_header = { 0 };
 HWND mm_mod_info_file_count_data = { 0 };
 HWND mm_mod_info_file_list_header = { 0 };
 HWND mm_mod_info_file_list_data = { 0 };
+HWND mm_mod_info_install_window = { 0 };
+HWND mm_mod_info_install_header = { 0 };
+HWND mm_mod_info_install_progress = { 0 };
+HWND mm_mod_info_install_file = { 0 };
 
 HWND mm_directory_info_group = { 0 };
 HWND mm_game_location_label = { 0 };
@@ -39,10 +43,16 @@ HWND mm_backup_location_label = { 0 };
 HWND mm_backup_location_browse_button = { 0 };
 HWND mm_backup_location_browse_label = { 0 };
 
+HWND mm_main_window = { 0 };
+
 bool scanning_mod_archives = false;
 
 void mm_create_controls(HWND mmWindow, HINSTANCE hInstance)
 {
+	// store the main window
+	mm_main_window = mmWindow;
+
+	// mod group
 	mm_mod_location_group = CreateWindowEx(0, WC_BUTTON, _TEXT("Mod Listings"), BS_GROUPBOX | WS_GROUP | WS_CHILD | WS_VISIBLE, 10, 10, 750, 430, mmWindow, 0, hInstance, 0);
 	SendMessage(mm_mod_location_group, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
 
@@ -129,6 +139,19 @@ void mm_create_controls(HWND mmWindow, HINSTANCE hInstance)
 
 	mm_backup_location_browse_label = CreateWindowEx(0, WC_EDIT, _TEXT("Where do you want to backup your original files to?"), WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 110, 730, 640, 25, mmWindow, (HMENU)MM_CONTROL_BACKUP_DIR_LOCATION_LABEL, hInstance, 0);
 	SendMessage(mm_backup_location_browse_label, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	// popup to show installing thing
+	mm_mod_info_install_window = CreateWindowEx(0, WC_DIALOG, _TEXT(""), WS_CHILD, 225, 225, 350, 100, mmWindow, 0, hInstance, 0);
+	SendMessage(mm_mod_info_install_window, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	mm_mod_info_install_header = CreateWindowEx(0, WC_STATIC, _TEXT("Installing mod..."), WS_CHILD | WS_VISIBLE | SS_LEFT, 10, 10, 150, 25, mm_mod_info_install_window, (HMENU)MM_CONTROL_PROGRESS_HEADER, hInstance, 0);
+	SendMessage(mm_mod_info_install_header, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	mm_mod_info_install_progress = CreateWindowEx(0, PROGRESS_CLASS, NULL, WS_CHILD | WS_VISIBLE, 10, 40, 330, 25, mm_mod_info_install_window, (HMENU)MM_CONTROL_PROGRESS_BACKUP, hInstance, 0);
+	SendMessage(mm_mod_info_install_progress, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	mm_mod_info_install_file = CreateWindowEx(0, WC_STATIC, _TEXT(""), WS_CHILD | WS_VISIBLE | SS_LEFT, 10, 70, 330, 25, mm_mod_info_install_window, (HMENU)MM_CONTROL_PROGRESS_FILE, hInstance, 0);
+	SendMessage(mm_mod_info_install_file, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
 }
 
 void mm_control_handler(HWND mmWindow, WPARAM wParam)
@@ -326,6 +349,58 @@ static int CALLBACK mm_control_backup_location_handler(HWND hWnd, UINT message, 
 	}
 
 	return 0;
+}
+
+int progressInstallationFileCount = 0;
+int progressInstallationFile = 0;
+
+void mm_show_installation_progress(int fileCount, bool isInstalling)
+{
+	if (!mm_mod_info_install_window)
+		return;
+
+	// toggle the usability of the main window
+	EnableWindow(mm_main_window, false);
+
+	// toggle the visibility of the popover progress bar
+	ShowWindow(mm_mod_info_install_window, true);
+
+	// reset the position
+	// update the text
+	SetDlgItemTextA(mm_mod_info_install_window, MM_CONTROL_PROGRESS_HEADER, (isInstalling ? "Installing mod, please wait..." : "Uninstalling mod, please wait..."));
+	SendMessage(mm_mod_info_install_progress, PBM_SETPOS, 0, 0);
+
+	// file count
+	progressInstallationFile = 0;
+	progressInstallationFileCount = fileCount;
+}
+
+void mm_update_installation_file(const char* filename)
+{
+	if (!mm_mod_info_install_window)
+		return;
+
+	// update the file we're on
+	SetDlgItemTextA(mm_mod_info_install_window, MM_CONTROL_PROGRESS_FILE, filename);
+	
+	// update what step we're on
+	SendMessage(mm_mod_info_install_progress, PBM_SETPOS, ((++progressInstallationFile * 100) / progressInstallationFileCount), 0);
+
+	// close if it's the last file
+	if (progressInstallationFile == progressInstallationFileCount)
+		mm_hide_installation_progress();
+}
+
+void mm_hide_installation_progress(void)
+{
+	if (!mm_mod_info_install_window)
+		return;
+
+	// toggle the usability of the main window
+	EnableWindow(mm_main_window, true);
+
+	// toggle the visibility of the popover progress bar
+	ShowWindow(mm_mod_info_install_window, false);
 }
 
 void mm_handle_mod_directory_found(HWND hWnd, TCHAR* filePath)
