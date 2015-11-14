@@ -27,6 +27,13 @@ HWND mm_mod_info_file_count_header = { 0 };
 HWND mm_mod_info_file_count_data = { 0 };
 HWND mm_mod_info_file_list_header = { 0 };
 HWND mm_mod_info_file_list_data = { 0 };
+HWND mm_directory_info_group = { 0 };
+HWND mm_game_location_label = { 0 };
+HWND mm_game_location_browse_button = { 0 };
+HWND mm_game_location_browse_label = { 0 };
+HWND mm_backup_location_label = { 0 };
+HWND mm_backup_location_browse_button = { 0 };
+HWND mm_backup_location_browse_label = { 0 };
 
 bool scanning_mod_archives = false;
 
@@ -92,6 +99,32 @@ void mm_create_controls(HWND mmWindow, HINSTANCE hInstance)
 
 	mm_mod_info_file_list_data = CreateWindowEx(0, WC_LISTBOX, 0, WS_VISIBLE | WS_CHILD | ES_AUTOVSCROLL | LBS_STANDARD | LBS_NOSEL, 440, 490, 300, 110, mmWindow, 0, hInstance, 0);
 	SendMessage(mm_mod_info_file_list_data, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	// directory info
+	mm_directory_info_group = CreateWindowEx(0, WC_BUTTON, _TEXT("Directory Information"), BS_GROUPBOX | WS_GROUP | WS_CHILD | WS_VISIBLE, 10, 610, 750, 155, mmWindow, 0, hInstance, 0);
+	SendMessage(mm_directory_info_group, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	// game location header
+	mm_game_location_label = CreateWindowEx(0, WC_EDIT, _TEXT("Game Directory"), WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 20, 630, 150, 25, mmWindow, 0, hInstance, 0);
+	SendMessage(mm_game_location_label, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	// game location stuff
+	mm_game_location_browse_button = CreateWindowEx(0, WC_BUTTON, _TEXT("Browse..."), BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE, 20, 655, 80, 25, mmWindow, (HMENU)MM_CONTROL_GAME_DIR_LOCATION_BTN, hInstance, 0);
+	SendMessage(mm_game_location_browse_button, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	mm_game_location_browse_label = CreateWindowEx(0, WC_EDIT, _TEXT("Where is DiRT Rally installed?"), WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 110, 660, 640, 25, mmWindow, (HMENU)MM_CONTROL_GAME_DIR_LOCATION_LABEL, hInstance, 0);
+	SendMessage(mm_game_location_browse_label, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	// backup location header
+	mm_backup_location_label = CreateWindowEx(0, WC_EDIT, _TEXT("Backup Directory"), WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 20, 700, 150, 25, mmWindow, 0, hInstance, 0);
+	SendMessage(mm_backup_location_label, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	// backup location stuff
+	mm_backup_location_browse_button = CreateWindowEx(0, WC_BUTTON, _TEXT("Browse..."), BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE, 20, 725, 80, 25, mmWindow, (HMENU)MM_CONTROL_BACKUP_DIR_LOCATION_BTN, hInstance, 0);
+	SendMessage(mm_backup_location_browse_button, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	mm_backup_location_browse_label = CreateWindowEx(0, WC_EDIT, _TEXT("Where do you want to backup your original files to?"), WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 110, 730, 640, 25, mmWindow, (HMENU)MM_CONTROL_BACKUP_DIR_LOCATION_LABEL, hInstance, 0);
+	SendMessage(mm_backup_location_browse_label, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
 }
 
 void mm_control_handler(HWND mmWindow, WPARAM wParam)
@@ -133,6 +166,72 @@ void mm_control_handler(HWND mmWindow, WPARAM wParam)
 			}
 		}
 		break;
+
+		case MM_CONTROL_GAME_DIR_LOCATION_BTN:
+		{
+			OPENFILENAME ofn;
+			ZeroMemory(&ofn, sizeof(ofn));
+
+			// get the path that we're gonna start from using the label
+			TCHAR filePath[MAX_PATH] = _TEXT("");
+			int len = GetWindowTextLength(GetDlgItem(mmWindow, MM_CONTROL_GAME_DIR_LOCATION_LABEL));
+			if (len > 0)
+				GetDlgItemText(mmWindow, MM_CONTROL_GAME_DIR_LOCATION_LABEL, filePath, MAX_PATH);
+
+			// the info for the folder browser
+			BROWSEINFO browseInfo = { 0 };
+			browseInfo.lpszTitle = _T("DiRT Rally Location");
+			browseInfo.hwndOwner = mmWindow;
+			browseInfo.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE | BIF_NONEWFOLDERBUTTON | BIF_EDITBOX;
+			browseInfo.lpfn = mm_control_game_location_handler;
+			browseInfo.lParam = (LPARAM)filePath;
+
+			// fire the folder browser and then update our label if we get somewhere
+			LPITEMIDLIST lpItemIDList = SHBrowseForFolder(&browseInfo);
+			if (lpItemIDList)
+			{
+				// get the folder we chose and set the label
+				SHGetPathFromIDList(lpItemIDList, filePath);
+				SetDlgItemText(mmWindow, MM_CONTROL_GAME_DIR_LOCATION_LABEL, filePath);
+
+				// free memory
+				CoTaskMemFree(lpItemIDList);
+			}
+		}
+		break;
+
+		case MM_CONTROL_BACKUP_DIR_LOCATION_BTN:
+		{
+			OPENFILENAME ofn;
+			ZeroMemory(&ofn, sizeof(ofn));
+
+			// get the path that we're gonna start from using the label
+			TCHAR filePath[MAX_PATH] = _TEXT("");
+			int len = GetWindowTextLength(GetDlgItem(mmWindow, MM_CONTROL_BACKUP_DIR_LOCATION_LABEL));
+			if (len > 0)
+				GetDlgItemText(mmWindow, MM_CONTROL_BACKUP_DIR_LOCATION_LABEL, filePath, MAX_PATH);
+
+			// the info for the folder browser
+			BROWSEINFO browseInfo = { 0 };
+			browseInfo.lpszTitle = _T("The directory to store your original DiRT Rally files in");
+			browseInfo.hwndOwner = mmWindow;
+			browseInfo.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE | BIF_NONEWFOLDERBUTTON | BIF_EDITBOX;
+			browseInfo.lpfn = mm_control_backup_location_handler;
+			browseInfo.lParam = (LPARAM)filePath;
+
+			// fire the folder browser and then update our label if we get somewhere
+			LPITEMIDLIST lpItemIDList = SHBrowseForFolder(&browseInfo);
+			if (lpItemIDList)
+			{
+				// get the folder we chose and set the label
+				SHGetPathFromIDList(lpItemIDList, filePath);
+				SetDlgItemText(mmWindow, MM_CONTROL_BACKUP_DIR_LOCATION_LABEL, filePath);
+
+				// free memory
+				CoTaskMemFree(lpItemIDList);
+			}
+		}
+		break;
 	}
 }
 
@@ -157,7 +256,65 @@ static int CALLBACK mm_control_mod_browser_handler(HWND hWnd, UINT message, LPAR
 			if (GetFileAttributes(filePath) != INVALID_FILE_ATTRIBUTES)
 				SendMessage(hWnd, BFFM_ENABLEOK, 0, TRUE);
 			else
+				SendMessage(hWnd, BFFM_ENABLEOK, 0, FALSE);
+		}
+		break;
+	}
+
+	return 0;
+}
+
+static int CALLBACK mm_control_game_location_handler(HWND hWnd, UINT message, LPARAM lParam, LPARAM lpData)
+{
+	switch (message)
+	{
+		case BFFM_INITIALIZED:
+		{
+			// update our selection if we passed data
+			if (lpData)
+				SendMessage(hWnd, BFFM_SETSELECTION, TRUE, lpData);
+		}
+		break;
+
+		case BFFM_SELCHANGED:
+		{
+			TCHAR file_path[MAX_PATH] = { 0 };
+			SHGetPathFromIDList(reinterpret_cast<LPITEMIDLIST>(lParam), file_path);
+
+			_tcscat(file_path, _TEXT("\\drt.exe"));
+
+			if (GetFileAttributes(file_path) != INVALID_FILE_ATTRIBUTES)
 				SendMessage(hWnd, BFFM_ENABLEOK, 0, TRUE);
+			else
+				SendMessage(hWnd, BFFM_ENABLEOK, 0, FALSE);
+		}
+		break;
+	}
+
+	return 0;
+}
+
+static int CALLBACK mm_control_backup_location_handler(HWND hWnd, UINT message, LPARAM lParam, LPARAM lpData)
+{
+	switch (message)
+	{
+		case BFFM_INITIALIZED:
+		{
+			// update our selection if we passed data
+			if (lpData)
+				SendMessage(hWnd, BFFM_SETSELECTION, TRUE, lpData);
+		}
+		break;
+
+		case BFFM_SELCHANGED:
+		{
+			TCHAR file_path[MAX_PATH] = { 0 };
+			SHGetPathFromIDList(reinterpret_cast<LPITEMIDLIST>(lParam), file_path);
+
+			if (GetFileAttributes(file_path) != INVALID_FILE_ATTRIBUTES)
+				SendMessage(hWnd, BFFM_ENABLEOK, 0, TRUE);
+			else
+				SendMessage(hWnd, BFFM_ENABLEOK, 0, FALSE);
 		}
 		break;
 	}

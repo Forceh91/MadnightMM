@@ -4,6 +4,7 @@
 #include "mm_mod_archive.h"
 #include <stdio.h>
 #include <string.h>
+#include <tchar.h>
 #include <Windows.h>
 
 // Probably safe to assume no one will manage to install over 1000 mods at once. Probably.
@@ -14,6 +15,7 @@
 
 static mm_installed_mod *installed_mods[MAX_INSTALLED_MODS];
 static unsigned int num_installed_mods;
+extern TCHAR mm_app_data_loc[MAX_PATH];
 
 //
 // Utility file functions. Text functions assume the buffer is always big enough and the strings are less than 255 chars, null terminated!
@@ -96,8 +98,7 @@ void mm_cleanup_installed_mods(void)
 
 void mm_load_installed_mod_list(void)
 {
-	// TODO: Load this file from wherever config files are stored?
-	const char *installed_mods_file = "D:\\Projects\\Muuta\\MadnightMM\\src\\x64\\Debug\\installed.dat";
+	const char *installed_mods_file = _tcscat(mm_app_data_loc, _TEXT("\\installed.dat"));
 
 	FILE *file = fopen(installed_mods_file, "r");
 
@@ -145,8 +146,7 @@ void mm_load_installed_mod_list(void)
 
 void mm_save_installed_mod_list(void)
 {
-	// TODO: Save this to wherever config files are stored?
-	const char *installed_mods_file = "D:\\Projects\\Muuta\\MadnightMM\\src\\x64\\Debug\\installed.dat";
+	const char *installed_mods_file = _tcscat(mm_app_data_loc, _TEXT("\\installed.dat"));
 
 	FILE *file = fopen(installed_mods_file, "w");
 
