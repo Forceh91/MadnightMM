@@ -8,7 +8,9 @@
 #include "mm_mod_list.h"
 #include "mm_controls.h"
 #include "mm_utils.h"
+#include "mm_mod_installer.h"
 
+extern char modPath[MAX_PATH];
 extern char gamePath[MAX_PATH];
 extern char backupPath[MAX_PATH];
 
@@ -59,7 +61,7 @@ void mm_create_controls(HWND mmWindow, HINSTANCE hInstance)
 	mm_mod_location_browse_button = CreateWindowEx(0, WC_BUTTON, _TEXT("Browse..."), BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE, 20, 30, 80, 25, mmWindow, (HMENU)MM_CONTROL_MOD_LOCATION_BROWSE, hInstance, 0);
 	SendMessage(mm_mod_location_browse_button, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
 
-	mm_mod_location_label = CreateWindowEx(0, WC_EDIT, _TEXT("Please select the directory that your mods are stored in..."), WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 110, 35, 640, 25, mmWindow, (HMENU)MM_CONTROL_MOD_LOCATION_LABEL, hInstance, 0);
+	mm_mod_location_label = CreateWindowEx(0, WC_EDIT, _TEXT(mm_has_mod_directory() ? modPath : "Please select the directory that your mods are stored in..."), WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 110, 35, 640, 25, mmWindow, (HMENU)MM_CONTROL_MOD_LOCATION_LABEL, hInstance, 0);
 	SendMessage(mm_mod_location_label, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
 
 	mm_mod_file_list = CreateWindowEx(0, WC_LISTVIEW, _TEXT(""), WS_CHILD | WS_VISIBLE | ES_AUTOVSCROLL | LVS_REPORT | LVS_SHOWSELALWAYS, 20, 65, 730, 365, mmWindow, (HMENU)MM_CONTROL_MOD_FILE_LIST, hInstance, 0);
@@ -126,7 +128,7 @@ void mm_create_controls(HWND mmWindow, HINSTANCE hInstance)
 	mm_game_location_browse_button = CreateWindowEx(0, WC_BUTTON, _TEXT("Browse..."), BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE, 20, 655, 80, 25, mmWindow, (HMENU)MM_CONTROL_GAME_DIR_LOCATION_BTN, hInstance, 0);
 	SendMessage(mm_game_location_browse_button, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
 
-	mm_game_location_browse_label = CreateWindowEx(0, WC_EDIT, _TEXT("Where is DiRT Rally installed?"), WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 110, 660, 640, 25, mmWindow, (HMENU)MM_CONTROL_GAME_DIR_LOCATION_LABEL, hInstance, 0);
+	mm_game_location_browse_label = CreateWindowEx(0, WC_EDIT, _TEXT(mm_has_game_directory() ? gamePath : "Where is DiRT Rally installed?"), WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 110, 660, 640, 25, mmWindow, (HMENU)MM_CONTROL_GAME_DIR_LOCATION_LABEL, hInstance, 0);
 	SendMessage(mm_game_location_browse_label, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
 
 	// backup location header
@@ -137,7 +139,7 @@ void mm_create_controls(HWND mmWindow, HINSTANCE hInstance)
 	mm_backup_location_browse_button = CreateWindowEx(0, WC_BUTTON, _TEXT("Browse..."), BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE, 20, 725, 80, 25, mmWindow, (HMENU)MM_CONTROL_BACKUP_DIR_LOCATION_BTN, hInstance, 0);
 	SendMessage(mm_backup_location_browse_button, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
 
-	mm_backup_location_browse_label = CreateWindowEx(0, WC_EDIT, _TEXT("Where do you want to backup your original files to?"), WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 110, 730, 640, 25, mmWindow, (HMENU)MM_CONTROL_BACKUP_DIR_LOCATION_LABEL, hInstance, 0);
+	mm_backup_location_browse_label = CreateWindowEx(0, WC_EDIT, _TEXT(mm_has_backup_directory() ? backupPath : "Where do you want to backup your original files to?"), WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 110, 730, 640, 25, mmWindow, (HMENU)MM_CONTROL_BACKUP_DIR_LOCATION_LABEL, hInstance, 0);
 	SendMessage(mm_backup_location_browse_label, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
 
 	// popup to show installing thing
@@ -184,6 +186,10 @@ void mm_control_handler(HWND mmWindow, WPARAM wParam)
 				// get the folder we chose and set the label
 				SHGetPathFromIDList(lpItemIDList, filePath);
 				SetDlgItemText(mmWindow, MM_CONTROL_MOD_LOCATION_LABEL, filePath);
+				mm_str_cpy(modPath, filePath, sizeof(modPath));
+
+				// Save the directory into the config file.
+				mm_save_config_file();
 
 				// free memory
 				CoTaskMemFree(lpItemIDList);
@@ -222,6 +228,9 @@ void mm_control_handler(HWND mmWindow, WPARAM wParam)
 				SetDlgItemText(mmWindow, MM_CONTROL_GAME_DIR_LOCATION_LABEL, filePath);
 				mm_str_cpy(gamePath, filePath, sizeof(gamePath));
 
+				// Save the directory into the config file.
+				mm_save_config_file();
+
 				// free memory
 				CoTaskMemFree(lpItemIDList);
 			}
@@ -255,6 +264,9 @@ void mm_control_handler(HWND mmWindow, WPARAM wParam)
 				SHGetPathFromIDList(lpItemIDList, filePath);
 				SetDlgItemText(mmWindow, MM_CONTROL_BACKUP_DIR_LOCATION_LABEL, filePath);
 				mm_str_cpy(backupPath, filePath, sizeof(backupPath));
+
+				// Save the directory into the config file.
+				mm_save_config_file();
 
 				// free memory
 				CoTaskMemFree(lpItemIDList);

@@ -6,6 +6,7 @@
 #include "mm_window.h"
 #include "mm_controls.h"
 #include "mm_mod_list.h"
+#include "mm_mod_installer.h"
 
 // make this look at least somewhat nice (we're programmers, not designers)
 #pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
@@ -86,6 +87,13 @@ bool mm_create_window(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 
 	// set the font
 	SendMessage(mm_window, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	// If the mod file has been selected previously, scan it for a list of installable mods.
+	if (mm_has_mod_directory())
+	{
+		extern char modPath[MAX_PATH];
+		mm_handle_mod_directory_found(mm_window, modPath);
+	}
 
 	// woot, everything is done
 	return true;

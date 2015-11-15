@@ -23,13 +23,14 @@ typedef struct _mm_installed_mod
 } mm_installed_mod;
 
 void mm_cleanup_installed_mods(void);
-void mm_load_installed_mod_list(void);
-void mm_save_installed_mod_list(void);
+void mm_load_config_file(void);
+void mm_save_config_file(void);
 
 bool mm_is_mod_installed(mm_mod_item *mod);
 bool mm_install_mod(mm_mod_item *mod);
 bool mm_uninstall_mod(mm_mod_item *mod);
 
+bool mm_has_mod_directory();
 bool mm_has_game_directory();
 bool mm_has_backup_directory();
 

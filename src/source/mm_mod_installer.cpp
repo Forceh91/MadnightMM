@@ -17,10 +17,11 @@
 static mm_installed_mod *installed_mods[MAX_INSTALLED_MODS];
 static unsigned int num_installed_mods;
 
-// TODO: Store these into a config file and load them in when the app loads
+char modPath[MAX_PATH] = { 0 };
 char gamePath[MAX_PATH] = { 0 };
 char backupPath[MAX_PATH] = { 0 };
-char installed_mods_file[MAX_PATH] = { 0 };
+
+static char config_file_path[MAX_PATH] = { 0 };
 
 extern TCHAR mm_app_data_loc[MAX_PATH];
 
@@ -103,14 +104,14 @@ void mm_cleanup_installed_mods(void)
 	num_installed_mods = 0;
 }
 
-void mm_load_installed_mod_list(void)
+void mm_load_config_file(void)
 {
-	if (!*installed_mods_file) {
-		_tcscat(installed_mods_file, mm_app_data_loc);
-		_tcscat(installed_mods_file, _TEXT("\\installed.dat"));
+	if (!*config_file_path) {
+		_tcscat(config_file_path, mm_app_data_loc);
+		_tcscat(config_file_path, _TEXT("\\config.dat"));
 	}
 	
-	FILE *file = fopen(installed_mods_file, "r");
+	FILE *file = fopen(config_file_path, "r");
 
 	// No mods have been installed previously.
 	if (file == NULL)
@@ -118,6 +119,11 @@ void mm_load_installed_mod_list(void)
 
 	// Read the file version. Currently unused.
 	unsigned int version = mm_read_uint(file);
+
+	// Read directories.
+	mm_read_string(file, modPath);
+	mm_read_string(file, gamePath);
+	mm_read_string(file, backupPath);
 
 	// Read the number of previously installed mods.
 	unsigned int mod_count = mm_read_uint(file);
@@ -154,14 +160,14 @@ void mm_load_installed_mod_list(void)
 	fclose(file);
 }
 
-void mm_save_installed_mod_list(void)
+void mm_save_config_file(void)
 {
-	if (!*installed_mods_file) {
-		_tcscat(installed_mods_file, mm_app_data_loc);
-		_tcscat(installed_mods_file, _TEXT("\\installed.dat"));
+	if (!*config_file_path) {
+		_tcscat(config_file_path, mm_app_data_loc);
+		_tcscat(config_file_path, _TEXT("\\config.dat"));
 	}
 
-	FILE *file = fopen(installed_mods_file, "w");
+	FILE *file = fopen(config_file_path, "w");
 
 	// No write access or some other bad stuff.
 	if (file == NULL)
@@ -169,6 +175,11 @@ void mm_save_installed_mod_list(void)
 
 	// Write the file version in case we want to upgrade the file format in the future.
 	mm_write_uint(file, FILE_VERSION);
+
+	// Write the folders used for installing/backing up mods.
+	mm_write_string(file, modPath);
+	mm_write_string(file, gamePath);
+	mm_write_string(file, backupPath);
 
 	// Write the number of installed mods.
 	mm_write_uint(file, num_installed_mods);
@@ -315,7 +326,7 @@ bool mm_install_mod(mm_mod_item *mod)
 		num_installed_mods++;
 
 		// Save the installed mod list.
-		mm_save_installed_mod_list();
+		mm_save_config_file();
 
 		mod->enabled = true;
 	}
@@ -366,17 +377,22 @@ bool mm_uninstall_mod(mm_mod_item *mod)
 	mod->enabled = false;
 
 	// Save the installed mod list.
-	mm_save_installed_mod_list();
+	mm_save_config_file();
 
 	return true;
 }
 
+bool mm_has_mod_directory()
+{
+	return (*modPath != 0);
+}
+
 bool mm_has_game_directory()
 {
-	return (*gamePath != NULL);
+	return (*gamePath != 0);
 }
 
 bool mm_has_backup_directory()
 {
-	return (*backupPath != NULL);
+	return (*backupPath != 0);
 }

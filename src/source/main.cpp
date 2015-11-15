@@ -5,6 +5,7 @@
 #include "mm_window.h"
 #include "mm_mod_archive.h"
 #include "mm_mod_installer.h"
+#include "mm_utils.h"
 
 bool mm_is_running = false;
 TCHAR mm_app_data_loc[MAX_PATH] = { 0 };
@@ -16,17 +17,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// create the directory where we will store stuff
 	_tcscat(mm_app_data_loc, _TEXT("\\Madnight Software\\MadnightMM"));
-	_tmkdir(mm_app_data_loc);
+	//_tmkdir(mm_app_data_loc);
+	mm_ensure_folder_exists(mm_app_data_loc);
 
-	// load a list of previously installed mods
-	mm_load_installed_mod_list();
-
-	// create our window
-	if (!mm_create_window(hInstance, hPrevInstance, lpCmdLine))
-		return 0;
+	// load a list of previously installed mods and settings
+	mm_load_config_file();
 
 	// initialize 7-zip.
 	ModArchive::Initialize("./7z.dll");
+
+	// create our window and populate it with available mods if the mod path is stored into the config file
+	if (!mm_create_window(hInstance, hPrevInstance, lpCmdLine))
+		return 0;
 
 	// running
 	mm_is_running = true;
