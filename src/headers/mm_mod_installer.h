@@ -30,4 +30,7 @@ bool mm_is_mod_installed(mm_mod_item *mod);
 bool mm_install_mod(mm_mod_item *mod);
 bool mm_uninstall_mod(mm_mod_item *mod);
 
+bool mm_has_game_directory();
+bool mm_has_backup_directory();
+
 #endif

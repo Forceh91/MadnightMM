@@ -370,3 +370,13 @@ bool mm_uninstall_mod(mm_mod_item *mod)
 
 	return true;
 }
+
+bool mm_has_game_directory()
+{
+	return (*gamePath != NULL);
+}
+
+bool mm_has_backup_directory()
+{
+	return (*backupPath != NULL);
+}

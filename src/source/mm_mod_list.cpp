@@ -2,6 +2,7 @@
 #include <windowsx.h>
 #include <CommCtrl.h>
 #include <stdio.h>
+#include <tchar.h>
 
 #include "mm_mod_list.h"
 #include "mm_controls.h"
@@ -142,6 +143,34 @@ void mm_mod_list_handle_item_change(LPNMLISTVIEW lParam)
 		// The checkbox state has changed, install or uninstall the mod.
 		if (modEnabled != mmModItem->enabled && !scanning_mod_archives)
 		{
+			char errorMessage[MAX_PATH] = { 0 };
+
+			// check the game directory exists
+			if (!mm_has_game_directory())
+			{
+				// throw an error
+				sprintf(errorMessage, "Unable to %s mod.\nPlease make sure that your game directory has been set.", (modEnabled ? "install" : "uninstall"));
+				MessageBox(mm_mod_list, _TEXT(errorMessage), _TEXT("An error occured"), MB_OK | MB_ICONERROR);
+
+				// check the checkbox again
+				ListView_SetCheckState(hdr->hwndFrom, lParam->iItem, !modEnabled);
+
+				return;
+			}
+
+			// check the backup directory exists
+			if (!mm_has_backup_directory())
+			{
+				// throw an error
+				sprintf(errorMessage, "Unable to %s mod.\nPlease make sure that your backup directory has been set.", (modEnabled ? "install" : "uninstall"));
+				MessageBox(mm_mod_list, _TEXT(errorMessage), "An error occured", MB_OK | MB_ICONERROR);
+
+				// check the checkbox again
+				ListView_SetCheckState(hdr->hwndFrom, lParam->iItem, !modEnabled);
+
+				return;
+			}
+
 			if (modEnabled) mm_install_mod(mmModItem);
 			else mm_uninstall_mod(mmModItem);
 		}
