@@ -292,3 +292,29 @@ void mm_get_mod_file_path(const char *file_name, const char *vehicle_name_short,
 		sprintf_s(buffer, buflen, "%s\\", (base_path ? base_path : ""));
 	}
 }
+
+bool mm_is_valid_location(const char* location_name)
+{
+	if (strcmp(location_name, "finland") == 0)
+		return true;
+
+	if (strcmp(location_name, "france") == 0)
+		return true;
+
+	if (strcmp(location_name, "germany") == 0)
+		return true;
+
+	if (strcmp(location_name, "norway") == 0)
+		return true;
+
+	if (strcmp(location_name, "sweden") == 0)
+		return true;
+
+	if (strcmp(location_name, "uk") == 0)
+		return true;
+
+	if (strcmp(location_name, "usa") == 0)
+		return true;
+
+	return false;
+}
