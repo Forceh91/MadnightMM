@@ -441,8 +441,14 @@ void mm_handle_mod_directory_found(HWND hWnd, TCHAR* filePath)
 			// if the mod item is valid (our program supports the mod format), add it to the list
 			if (modItem != NULL)
 			{
-				modItem->file_size = findData.nFileSizeLow;
-				mm_add_mod_item(modItem);
+				// only add them if they have files we recognize
+				if (modItem->file_count > 0)
+				{
+					modItem->file_size = findData.nFileSizeLow;
+					mm_add_mod_item(modItem);
+				}
+				else
+					mm_destroy_mod_item(modItem);
 			}
 		
 		} while (FindNextFile(hFind, &findData));
