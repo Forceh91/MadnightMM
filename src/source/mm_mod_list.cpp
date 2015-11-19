@@ -171,8 +171,9 @@ void mm_mod_list_handle_item_change(LPNMLISTVIEW lParam)
 				return;
 			}
 
+			// check that we're not conflicting if we're installing
 			mm_installed_mod *conflicting_mod = 0;
-			if ((conflicting_mod = mm_is_unique_mod(mmModItem)) != NULL)
+			if ((conflicting_mod = mm_is_unique_mod(mmModItem)) != NULL && modEnabled)
 			{
 				// throw an error
 				sprintf(errorMessage, "Unable to %s %s.\n\nThis mod has files that conflict with:\n%s.\n\nPlease uninstall that mod before installing this one.", (modEnabled ? "install" : "uninstall"), mmModItem->mod_name, conflicting_mod->file_path);
