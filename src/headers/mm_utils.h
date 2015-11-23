@@ -33,6 +33,13 @@ typedef struct _mm_vehicle_data
 
 } mm_vehicle_data;
 
+typedef struct _mm_stage_data
+{
+	const char *location;
+	const char *short_name;
+	const char *name;
+} mm_stage_data;
+
 
 const char *mm_get_file_extension(const char *file, size_t length = 0);
 const char *mm_get_token_from_end(const char *str, char token, size_t length = 0);
@@ -46,6 +53,8 @@ bool mm_folder_exists(const char *path);
 
 mm_vehicle_data *mm_get_vehicle_data(const char *short_name);
 void mm_scan_livery_list(const char *gamePath);
+
+mm_stage_data *mm_get_stage_data(const char *location, const char *short_name);
 
 unsigned int mm_calculate_file_crc32(const char *file);
 

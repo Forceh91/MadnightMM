@@ -16,10 +16,12 @@ enum ModFileFlags {
 	FFLAG_TEXTURE_LIVERY = 1 << 2,
 	FFLAG_TEXTURE_INTERIOR = 1 << 3,
 	FFLAG_QUALITY_HIGH = 1 << 4,
-	FFLAG_MOD_FILE = (FFLAG_TEXTURE_LIVERY|FFLAG_TEXTURE_INTERIOR),
+	FFLAG_LOCATION_FILE = 1 << 5,
+	FFLAG_MOD_FILE = (FFLAG_TEXTURE_LIVERY|FFLAG_TEXTURE_INTERIOR|FFLAG_LOCATION_FILE),
 };
 
 typedef struct _mm_vehicle_data mm_vehicle_data;
+typedef struct _mm_stage_data mm_stage_data;
 
 typedef struct _mm_mod_file
 {
@@ -29,6 +31,7 @@ typedef struct _mm_mod_file
 	unsigned char flags; // flags for this mod file (see ModFileFlags above)
 	unsigned char livery; // index of the livery
 	mm_vehicle_data *vehicle; // vehicle this file changes
+	mm_stage_data *stage; // stage this file changes
 
 } mm_mod_file;
 
@@ -43,6 +46,7 @@ typedef struct _mm_mod_item
 	unsigned char file_count; // the number of mod files inside the mod archive
 	unsigned char item_count; // the number of all files and directories inside the mod archive
 	mm_vehicle_data *vehicle; // data of the vehicle this mod alters
+	mm_stage_data *stage; // data of the stage this mod alters
 	mm_mod_file **files; // an array containing info about each file and directory inside the mod, length item_count
 
 } mm_mod_item;
@@ -56,5 +60,7 @@ mm_mod_file *mm_create_mod_file(unsigned char index, const char *file, bool dire
 void mm_destroy_mod_file(mm_mod_file *file);
 void mm_get_mod_file_path(mm_mod_file *file, char *buffer, size_t buflen, const char *base_path = 0, bool include_file = true);
 void mm_get_mod_file_path(const char *file_name, const char *vehicle_name_short, unsigned char file_flags, unsigned char livery_index, char *buffer, size_t buflen, const char *base_path = 0, bool include_file = true);
+
+bool mm_is_valid_location(const char* location_name);
 
 #endif

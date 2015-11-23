@@ -46,6 +46,25 @@ static mm_vehicle_data vehicles[] = {
 	{ 0, "-", 0 }
 };
 
+static mm_stage_data stages[] = {
+	{ "finland", "ouninpohja_rally_01", "Finland #1" },
+	{ "finland", "ouninpohja_rally_02", "Finland #2" },
+	{ "france", "col_de_turini_rally_01", "Monaco #1" },
+	{ "france", "col_de_turini_rally_02", "Monaco #2" },
+	{ "germany", "panzerplatte_rally_01", "Germany #1" },
+	{ "germany", "panzerplatte_rally_02", "Germany #2" },
+	{ "greece", "ghymno_rally_01", "Greece #1" },
+	{ "greece", "ghymno_rally_02", "Greece #2" },
+	{ "norway", "hell_rallycross", "Norway, Hell" },
+	{ "sweden", "holjes_rallycross", "Sweden, Holjes" },
+	{ "uk", "hafren_rally_01", "Wales #1" },
+	{ "uk", "hafren_rally_02", "Wales #2" },
+	{ "uk", "lydden_hill_rallycross", "UK, Lydden Hill" },
+	{ "usa", "pikes_peak", "USA, Pikes Peak" },
+	{ "usa", "pikes_peak_historic", "USA, Pikes Peak (Mixed)" }
+};
+
+
 const char *mm_get_file_extension(const char *file, size_t length)
 {
 	return mm_get_token_from_end(file, '.', length);
@@ -186,6 +205,22 @@ void mm_scan_livery_list(const char *gamePath)
 	}
 
 	liveriesScanned = true;
+}
+
+mm_stage_data *mm_get_stage_data(const char *location, const char *short_name)
+{
+	unsigned int index;
+
+	for (index = 0; stages[index].location != 0; ++index)
+	{
+		if (strcmp(stages[index].location, location))
+			continue;
+
+		if (strcmp(stages[index].short_name, short_name) == 0)
+			return &stages[index];
+	}
+
+	return NULL;
 }
 
 //

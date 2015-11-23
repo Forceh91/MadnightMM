@@ -33,5 +33,6 @@ bool mm_uninstall_mod(mm_mod_item *mod);
 bool mm_has_mod_directory();
 bool mm_has_game_directory();
 bool mm_has_backup_directory();
+mm_installed_mod *mm_is_unique_mod(mm_mod_item *checking_mod);
 
 #endif

@@ -396,3 +396,31 @@ bool mm_has_backup_directory()
 {
 	return (*backupPath != 0);
 }
+
+mm_installed_mod *mm_is_unique_mod(mm_mod_item *checking_mod)
+{
+	for (unsigned int i = 0, j = 0; j < num_installed_mods; ++i)
+	{
+		if (installed_mods[i] == NULL)
+			continue;
+
+		mm_installed_mod *mod = installed_mods[i];
+
+		// check through the files of the installed mod
+		for (unsigned int f = 0; f < mod->file_count; ++f)
+		{
+			// comparing each one to whats installed in this mod
+			for (unsigned int g = 0; g < checking_mod->file_count; ++g)
+			{
+				if (strcmp(checking_mod->files[g]->name, mod->files[f].file_name))
+					continue;
+
+				return mod;
+			}
+		}
+
+		++j;
+	}
+
+	return NULL;
+}
