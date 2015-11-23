@@ -228,6 +228,9 @@ void mm_control_handler(HWND mmWindow, WPARAM wParam)
 				SetDlgItemText(mmWindow, MM_CONTROL_GAME_DIR_LOCATION_LABEL, filePath);
 				mm_str_cpy(gamePath, filePath, sizeof(gamePath));
 
+				// Scan the game folder to find out livery slots for each vehicle.
+				mm_scan_livery_list(gamePath);
+
 				// Save the directory into the config file.
 				mm_save_config_file();
 

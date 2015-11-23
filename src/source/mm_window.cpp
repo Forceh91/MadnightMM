@@ -7,6 +7,7 @@
 #include "mm_controls.h"
 #include "mm_mod_list.h"
 #include "mm_mod_installer.h"
+#include "mm_utils.h"
 
 // make this look at least somewhat nice (we're programmers, not designers)
 #pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
@@ -87,6 +88,13 @@ bool mm_create_window(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 
 	// set the font
 	SendMessage(mm_window, WM_SETFONT, (WPARAM)GetStockObject(ANSI_VAR_FONT), 0);
+
+	// Scan the game directory to find out valid livery slots for each vehicle.
+	if (mm_has_game_directory())
+	{
+		extern char gamePath[MAX_PATH];
+		mm_scan_livery_list(gamePath);
+	}
 
 	// If the mod file has been selected previously, scan it for a list of installable mods.
 	if (mm_has_mod_directory())

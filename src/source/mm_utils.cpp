@@ -5,43 +5,43 @@
 #include <Shlobj.h>
 
 static mm_vehicle_data vehicles[] = {
-	{ "6rb", "MG Metro 6R4", CLASS_GRB },
-	{ "20b", "Peugeot 205 T16", CLASS_GRB },
-	{ "20p", "Peugeot 205 T16 PP", CLASS_PIKESPEAK },
-	{ "20x", "Peugeot 208 WRX", CLASS_RALLYX },
-	{ "037", "Lancia 037 Evo 2", CLASS_GRB_RWD },
-	{ "131", "Fiat 131 Abarth", CLASS_70 },
-	{ "306", "Peugeot 306 Maxi", CLASS_F2 },
-	{ "405", "Peugeot 405 T16 PP", CLASS_PIKESPEAK },
-	{ "555", "Subaru Impreza 555", CLASS_GRA },
-	{ "aqb", "Audi Sport Quattro Rallye", CLASS_GRB },
-	{ "aqp", "Audi Sport Quattro S1 PP", CLASS_PIKESPEAK },
-	{ "c4r", "Citroën C4 WRC", CLASS_WRC00 },
-	{ "cme", "Ford Escort Mk II", CLASS_70 },
-	{ "dsx", "Citroën DS3", CLASS_RALLYX },
-	{ "ers", "Ford Escort RS Cosworth", CLASS_GRA },
-	{ "ffr", "Ford Fiesta RS WRC", CLASS_WRC10 },
-	{ "for", "Ford Focus RS WRC 07", CLASS_WRC00 },
-	{ "fow", "Ford Focus RS WRC 01", CLASS_WRC00 },
-	{ "frx", "Ford Fiesta WRX", CLASS_RALLYX },
-	{ "ful", "Lancia Fulvia HF", CLASS_60 },
-	{ "imp", "Subaru Impreza WRC", CLASS_WRC00 },
-	{ "kad", "Opel Kadett GT/E 16v", CLASS_70 },
-	{ "ldi", "Lancia Delta HF Integrale", CLASS_GRA },
-	{ "lds", "Lancia Delta S4", CLASS_GRB },
-	{ "m3r", "BMW E30 M3 Evo Rally", CLASS_80 },
-	{ "mcr", "Mini Countryman JCW WRC", CLASS_WRC10 },
-	{ "mcs", "Mini Cooper S", CLASS_60 },
-	{ "mcx", "Mini Countryman JCW WRX", CLASS_RALLYX },
-	{ "mer", "Mitsubishi Lancer Evolution X", CLASS_R4 },
-	{ "mta", "Opel Manta 400", CLASS_GRB_RWD },
-	{ "pox", "Volkswagen Polo RX", CLASS_RALLYX },
-	{ "rsb", "Ford RS200", CLASS_GRB },
-	{ "sik", "SEAT Ibiza Kit Car", CLASS_F2 },
-	{ "srs", "Ford Sierra Cosworth RS500", CLASS_80 },
-	{ "sti", "Subaru Impreza WRX STI", CLASS_R4 },
-	{ "str", "Lancia Stratos", CLASS_70 },
-	{ "stx", "Subaru Impreza WRX STi", CLASS_RALLYX },
+	{ "6rb", "MG Metro 6R4", CLASS_GRB, 0 },
+	{ "20b", "Peugeot 205 T16", CLASS_GRB, 0 },
+	{ "20p", "Peugeot 205 T16 PP", CLASS_PIKESPEAK, 0 },
+	{ "20x", "Peugeot 208 WRX", CLASS_RALLYX, 0 },
+	{ "037", "Lancia 037 Evo 2", CLASS_GRB_RWD, 0 },
+	{ "131", "Fiat 131 Abarth", CLASS_70, 0 },
+	{ "306", "Peugeot 306 Maxi", CLASS_F2, 0 },
+	{ "405", "Peugeot 405 T16 PP", CLASS_PIKESPEAK, 0 },
+	{ "555", "Subaru Impreza 555", CLASS_GRA, 0 },
+	{ "aqb", "Audi Sport Quattro Rallye", CLASS_GRB, 0 },
+	{ "aqp", "Audi Sport Quattro S1 PP", CLASS_PIKESPEAK, 0 },
+	{ "c4r", "Citroën C4 WRC", CLASS_WRC00, 0 },
+	{ "cme", "Ford Escort Mk II", CLASS_70, 0 },
+	{ "dsx", "Citroën DS3", CLASS_RALLYX, 0 },
+	{ "ers", "Ford Escort RS Cosworth", CLASS_GRA, 0 },
+	{ "ffr", "Ford Fiesta RS WRC", CLASS_WRC10, 0 },
+	{ "for", "Ford Focus RS WRC 07", CLASS_WRC00, 0 },
+	{ "fow", "Ford Focus RS WRC 01", CLASS_WRC00, 0 },
+	{ "frx", "Ford Fiesta WRX", CLASS_RALLYX, 0 },
+	{ "ful", "Lancia Fulvia HF", CLASS_60, 0 },
+	{ "imp", "Subaru Impreza WRC", CLASS_WRC00, 0 },
+	{ "kad", "Opel Kadett GT/E 16v", CLASS_70, 0 },
+	{ "ldi", "Lancia Delta HF Integrale", CLASS_GRA, 0 },
+	{ "lds", "Lancia Delta S4", CLASS_GRB, 0 },
+	{ "m3r", "BMW E30 M3 Evo Rally", CLASS_80, 0 },
+	{ "mcr", "Mini Countryman JCW WRC", CLASS_WRC10, 0 },
+	{ "mcs", "Mini Cooper S", CLASS_60, 0 },
+	{ "mcx", "Mini Countryman JCW WRX", CLASS_RALLYX, 0 },
+	{ "mer", "Mitsubishi Lancer Evolution X", CLASS_R4, 0 },
+	{ "mta", "Opel Manta 400", CLASS_GRB_RWD, 0 },
+	{ "pox", "Volkswagen Polo RX", CLASS_RALLYX, 0 },
+	{ "rsb", "Ford RS200", CLASS_GRB, 0 },
+	{ "sik", "SEAT Ibiza Kit Car", CLASS_F2, 0 },
+	{ "srs", "Ford Sierra Cosworth RS500", CLASS_80, 0 },
+	{ "sti", "Subaru Impreza WRX STI", CLASS_R4, 0 },
+	{ "str", "Lancia Stratos", CLASS_70, 0 },
+	{ "stx", "Subaru Impreza WRX STi", CLASS_RALLYX, 0 },
 
 	{ 0, "-", 0 }
 };
@@ -119,6 +119,18 @@ bool mm_file_exists(const char *path)
 	return false;
 }
 
+bool mm_folder_exists(const char *path)
+{
+	DWORD attrib = GetFileAttributes(path);
+
+	if (attrib == INVALID_FILE_ATTRIBUTES || (attrib & FILE_ATTRIBUTE_DIRECTORY) == 0)
+	{
+		return false;
+	}
+
+	return true;
+}
+
 mm_vehicle_data *mm_get_vehicle_data(const char *short_name)
 {
 	unsigned int index;
@@ -132,6 +144,48 @@ mm_vehicle_data *mm_get_vehicle_data(const char *short_name)
 	}
 
 	return NULL;
+}
+
+void mm_scan_livery_list(const char *gamePath)
+{
+	static bool liveriesScanned = false;
+
+	if (liveriesScanned)
+		return;
+
+	for (unsigned int i = 0; vehicles[i].short_name != NULL; ++i)
+	{
+		mm_vehicle_data *data = &vehicles[i];
+
+		// Find all the sub-directories in the car model directory.
+		char carModelPath[MAX_PATH];
+		sprintf_s(carModelPath, sizeof(carModelPath), "%s\\cars\\models\\%s\\*", gamePath, data->short_name);
+
+		WIN32_FIND_DATA findData;
+		HANDLE findHandle = FindFirstFile(carModelPath, &findData);
+
+		if (findHandle == INVALID_HANDLE_VALUE)
+			continue;
+
+		// Count all the sub-directories starting with 'livery_' and parse the livery index from the name.
+		do {
+			if ((findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0)
+			{
+				const char *livery = findData.cFileName;
+
+				if (strstr(livery, "livery_") != NULL &&
+					livery[7] != 0 &&
+					data->livery_count < MAX_LIVERIES)
+				{
+					data->liveries[data->livery_count++] = (unsigned char)atoi(&livery[7]);
+				}
+			}
+		} while (FindNextFile(findHandle, &findData) != 0);
+
+		FindClose(findHandle);
+	}
+
+	liveriesScanned = true;
 }
 
 //
