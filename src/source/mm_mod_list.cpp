@@ -8,6 +8,7 @@
 #include "mm_controls.h"
 #include "mm_mod_archive.h"
 #include "mm_mod_installer.h"
+#include "mm_mod_files_window.h"
 
 #define MAX_MOD_FILES 1000
 
@@ -143,50 +144,42 @@ void mm_mod_list_handle_item_change(LPNMLISTVIEW lParam)
 		// The checkbox state has changed, install or uninstall the mod.
 		if (modEnabled != mmModItem->enabled && !scanning_mod_archives)
 		{
-			char errorMessage[MAX_PATH] = { 0 };
-
-			// check the game directory exists
-			if (!mm_has_game_directory())
+			if (modEnabled)
 			{
-				// throw an error
-				sprintf(errorMessage, "Unable to %s mod.\nPlease make sure that your game directory has been set.", (modEnabled ? "install" : "uninstall"));
-				MessageBox(mm_mod_list, _TEXT(errorMessage), _TEXT("An error occured"), MB_OK | MB_ICONERROR);
-
-				// check the checkbox again
-				ListView_SetCheckState(hdr->hwndFrom, lParam->iItem, !modEnabled);
-
-				return;
+				// create the window showing our mods files
+				mm_mod_files_update_list(mmModItem, lParam->iItem);
+				mm_show_mod_install_files();
 			}
-
-			// check the backup directory exists
-			if (!mm_has_backup_directory())
+			else
 			{
-				// throw an error
-				sprintf(errorMessage, "Unable to %s mod.\nPlease make sure that your backup directory has been set.", (modEnabled ? "install" : "uninstall"));
-				MessageBox(mm_mod_list, _TEXT(errorMessage), "An error occured", MB_OK | MB_ICONERROR);
+				char errorMessage[MAX_PATH] = { 0 };
 
-				// check the checkbox again
-				ListView_SetCheckState(hdr->hwndFrom, lParam->iItem, !modEnabled);
+				// check the game directory exists
+				if (!mm_has_game_directory())
+				{
+					// throw an error
+					MessageBox(mm_mod_list, _TEXT("Unable to uninstall mod.\nPlease make sure that your game directory has been set."), _TEXT("An error occured"), MB_OK | MB_ICONERROR);
 
-				return;
+					// check the checkbox again
+					ListView_SetCheckState(hdr->hwndFrom, lParam->iItem, !modEnabled);
+
+					return;
+				}
+
+				// check the backup directory exists
+				if (!mm_has_backup_directory())
+				{
+					// throw an error
+					MessageBox(mm_mod_list, _TEXT("Unable to uninstsall mod.\nPlease make sure that your backup directory has been set."), "An error occured", MB_OK | MB_ICONERROR);
+
+					// check the checkbox again
+					ListView_SetCheckState(hdr->hwndFrom, lParam->iItem, !modEnabled);
+
+					return;
+				}
+
+				mm_uninstall_mod(mmModItem);
 			}
-
-			// check that we're not conflicting if we're installing
-			mm_installed_mod *conflicting_mod = 0;
-			if ((conflicting_mod = mm_is_unique_mod(mmModItem)) != NULL && modEnabled)
-			{
-				// throw an error
-				sprintf(errorMessage, "Unable to %s %s.\n\nThis mod has files that conflict with:\n%s.\n\nPlease uninstall that mod before installing this one.", (modEnabled ? "install" : "uninstall"), mmModItem->mod_name, conflicting_mod->file_path);
-				MessageBox(mm_mod_list, _TEXT(errorMessage), "Mod conflict", MB_OK | MB_ICONERROR);
-
-				// check the checkbox again
-				ListView_SetCheckState(hdr->hwndFrom, lParam->iItem, !modEnabled);
-
-				return;
-			}
-
-			if (modEnabled) mm_install_mod(mmModItem);
-			else mm_uninstall_mod(mmModItem);
 		}
 
 		// check for selected item
@@ -205,4 +198,62 @@ void mm_mod_list_handle_item_change(LPNMLISTVIEW lParam)
 		// update the mod info
 		mm_update_mod_information(mmSelectedModItem);
 	}
+}
+
+void mm_mod_list_install_mod(mm_mod_item *mod_item, int listIndex)
+{
+	// alright hide the mod file list window thing
+	mm_hide_mod_install_files();
+
+	// go through and check for errors
+	char errorMessage[MAX_PATH] = { 0 };
+
+	// check the game directory exists
+	if (!mm_has_game_directory())
+	{
+		// throw an error
+		MessageBox(mm_mod_list, _TEXT("Unable to install mod.\nPlease make sure that your game directory has been set."), _TEXT("An error occured"), MB_OK | MB_ICONERROR);
+
+		// check the checkbox again
+		ListView_SetCheckState(mm_mod_list , listIndex, false);
+
+		return;
+	}
+
+	// check the backup directory exists
+	if (!mm_has_backup_directory())
+	{
+		// throw an error
+		MessageBox(mm_mod_list, _TEXT("Unable to install mod.\nPlease make sure that your backup directory has been set."), "An error occured", MB_OK | MB_ICONERROR);
+
+		// check the checkbox again
+		ListView_SetCheckState(mm_mod_list, listIndex, false);
+
+		return;
+	}
+
+	// check that we're not conflicting if we're installing
+	mm_installed_mod *conflicting_mod = 0;
+	if ((conflicting_mod = mm_is_unique_mod(mod_item)) != NULL)
+	{
+		// throw an error
+		sprintf(errorMessage, "Unable to install %s.\n\nThis mod has files that conflict with:\n%s.\n\nPlease uninstall that mod before installing this one.", mod_item->mod_name, conflicting_mod->file_path);
+		MessageBox(mm_mod_list, _TEXT(errorMessage), "Mod conflict", MB_OK | MB_ICONERROR);
+
+		// check the checkbox again
+		ListView_SetCheckState(mm_mod_list, listIndex, false);
+
+		return;
+	}
+
+	mm_install_mod(mod_item);
+}
+
+void mm_mod_list_cancel_mod_install(mm_mod_item *mod_item, int listIndex)
+{
+	// alright hide the mod file list window thing
+	mm_hide_mod_install_files();
+
+	// update the checkbox state so that it goes back to the mod enabled state
+	ListView_SetCheckState(mm_mod_list, listIndex, mod_item->enabled);
 }

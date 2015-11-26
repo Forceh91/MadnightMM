@@ -32,4 +32,7 @@ void mm_show_installation_progress(int fileCount, bool isInstalling = true);
 void mm_update_installation_file(const char* filename);
 void mm_hide_installation_progress(void);
 
+void mm_show_mod_install_files(void);
+void mm_hide_mod_install_files(void);
+
 #endif

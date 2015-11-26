@@ -6,6 +6,7 @@
 #include "mm_mod_archive.h"
 #include "mm_mod_installer.h"
 #include "mm_utils.h"
+#include "mm_mod_files_window.h"
 
 bool mm_is_running = false;
 TCHAR mm_app_data_loc[MAX_PATH] = { 0 };
@@ -28,6 +29,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// create our window and populate it with available mods if the mod path is stored into the config file
 	if (!mm_create_window(hInstance, hPrevInstance, lpCmdLine))
+		return 0;
+
+	// create the mod list window
+	if (!mm_mod_files_create_window(hInstance, hPrevInstance, lpCmdLine))
 		return 0;
 
 	// running

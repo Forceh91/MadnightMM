@@ -9,6 +9,7 @@
 #include "mm_controls.h"
 #include "mm_utils.h"
 #include "mm_mod_installer.h"
+#include "mm_mod_files_window.h"
 
 extern char modPath[MAX_PATH];
 extern char gamePath[MAX_PATH];
@@ -416,6 +417,24 @@ void mm_hide_installation_progress(void)
 
 	// toggle the visibility of the popover progress bar
 	ShowWindow(mm_mod_info_install_window, false);
+}
+
+void mm_show_mod_install_files(void)
+{
+	// disable the window
+	EnableWindow(mm_main_window, false);
+
+	// show the mod files window
+	mm_mod_files_show_window(1);
+}
+
+void mm_hide_mod_install_files(void)
+{
+	// enable the window
+	EnableWindow(mm_main_window, true);
+
+	// hide the mod files window
+	mm_mod_files_show_window(0);
 }
 
 void mm_handle_mod_directory_found(HWND hWnd, TCHAR* filePath)
