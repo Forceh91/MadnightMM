@@ -215,7 +215,7 @@ void mm_mod_files_update_list(mm_mod_item *mm_mod, int listIndex)
 	ComboBox_SetCurSel(mm_mod_files_combobox, 0);
 
 	// go through each file in the mod
-	for (int i = 0, j = 0; i < mm_mod->file_count; i++)
+	for (int i = 0, j = 0; i < mm_mod->item_count && j < mm_mod->file_count; i++)
 	{
 		mm_mod_file *mod_file = mm_mod->files[i];
 		if (mod_file == NULL)

@@ -60,6 +60,9 @@
     <ClCompile Include="source\mm_mod_installer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\mm_mod_files_window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\mm_window.h">
@@ -120,6 +123,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="headers\mm_mod_installer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\mm_mod_files_window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

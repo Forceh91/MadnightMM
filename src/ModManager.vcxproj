@@ -22,6 +22,7 @@
     <ClCompile Include="source\mm_controls.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\mm_mod_archive.cpp" />
+    <ClCompile Include="source\mm_mod_files_window.cpp" />
     <ClCompile Include="source\mm_mod_installer.cpp" />
     <ClCompile Include="source\mm_mod_item.cpp" />
     <ClCompile Include="source\mm_mod_list.cpp" />
@@ -49,6 +50,7 @@
     <ClInclude Include="libraries\7-Zip\CPP\Common\Types.h" />
     <ClInclude Include="libraries\7-Zip\C\Types.h" />
     <ClInclude Include="source\mm_controls.h" />
+    <ClInclude Include="source\mm_mod_files_window.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{49997BAF-C372-4857-930B-19EFD2240782}</ProjectGuid>
