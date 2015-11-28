@@ -5,6 +5,7 @@
 #include <initguid.h>
 #include <Shlwapi.h>
 #include <stdio.h>
+#include <tchar.h>
 
 // GUIDs for file formats supported by 7-zip.
 DEFINE_GUID(CLSID_CFormatZip, 0x23170F69, 0x40C1, 0x278A, 0x10, 0x00, 0x00, 0x01, 0x10, 0x01, 0x00, 0x00); // {23170F69-40C1-278A-1000-000110010000}
@@ -124,9 +125,6 @@ bool ModArchive::Extract(const char *targetFolder, ExtractCallback callback)
 	mm_destroy_mod_item_files(mod, true);
 	ScanFiles();
 
-	// show the install progress
-	mm_show_installation_progress(mod->install_file_count);
-
 	if (mod->file_count == 0)
 	{
 		// Nothing to extract -> our job here is done!
@@ -153,6 +151,21 @@ bool ModArchive::Extract(const char *targetFolder, ExtractCallback callback)
 		indices[j++] = i;
 		numItems++;
 	}
+
+	if (numItems == 0)
+	{
+		// throw an error
+		extern HWND mm_mod_list;
+		MessageBox(mm_mod_list, _TEXT("Unable to install mod:\nNo files have been selected for installation."), _TEXT("An error occured"), MB_OK | MB_ICONERROR);
+
+		delete[] indices;
+		delete[] extractPath;
+
+		return false;
+	}
+
+	// show the install progress
+	mm_show_installation_progress(numItems);
 
 	// Use this callback to back up any files that would be overwritten.
 	extractCallback = callback;
