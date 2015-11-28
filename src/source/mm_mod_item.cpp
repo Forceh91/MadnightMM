@@ -7,6 +7,8 @@
 #include "mm_utils.h"
 #include "mm_mod_installer.h"
 
+static void mm_list_installable_files(mm_mod_item *item);
+
 mm_mod_item *mm_create_mod_item(const char *path, const char *file)
 {
 	size_t len = strlen(file);
@@ -31,7 +33,9 @@ mm_mod_item *mm_create_mod_item(const char *path, const char *file)
 	item->file_format = format;
 	item->file_count = 0;
 	item->item_count = 0;
+	item->install_file_count = 0;
 	item->files = NULL;
+	item->install_files = NULL;
 
 	// store the mod file path
 	size_t len2 = len + strlen(path) + 2;
@@ -69,13 +73,34 @@ void mm_destroy_mod_item(mm_mod_item *item)
 	if (item->mod_name != NULL) delete[] item->mod_name;
 	if (item->file_path != NULL) delete[] item->file_path;
 
-	mm_destroy_mod_item_files(item);
+	mm_destroy_mod_item_files(item, false);
 	
 	delete item;
 }
 
-void mm_destroy_mod_item_files(mm_mod_item *item)
+void mm_destroy_mod_item_files(mm_mod_item *item, bool list_install_files)
 {
+	// Destroy previous list of files to be installed (if any).
+	if (item->install_files != NULL)
+	{
+		for (int i = 0; i < item->install_file_count; ++i)
+		{
+			if (item->install_files[i].file_name != NULL)
+			{
+				delete item->install_files[i].file_name;
+			}
+		}
+
+		delete item->install_files;
+		item->install_files = NULL;
+		item->install_file_count = 0;
+	}
+
+	if (list_install_files)
+	{
+		mm_list_installable_files(item);
+	}
+
 	for (int i = 0; i < item->item_count; ++i)
 	{
 		mm_destroy_mod_file(item->files[i]);
@@ -86,6 +111,41 @@ void mm_destroy_mod_item_files(mm_mod_item *item)
 
 	item->item_count = 0;
 	item->file_count = 0;
+}
+
+static void mm_list_installable_files(mm_mod_item *item)
+{
+	// Compile a list of files the user wants to install.
+	int install_count = 0;
+
+	// First get the count of files the user has chosen for installation.
+	for (int i = 0; i < item->item_count; ++i)
+	{
+		if ((item->files[i]->flags & FFLAG_MOD_FILE) != 0 &&
+			(item->files[i]->flags & FFLAG_INSTALL) != 0)
+		{
+			++install_count;
+		}
+	}
+
+	// If the install file count is greater than 0, store the installation data into a temporary array.
+	if (install_count != 0)
+	{
+		item->install_file_count = install_count;
+		item->install_files = new mm_mod_install_file[install_count];
+
+		for (int i = 0, j = 0; i < item->item_count && j < install_count; ++i)
+		{
+			if ((item->files[i]->flags & FFLAG_MOD_FILE) != 0 &&
+				(item->files[i]->flags & FFLAG_INSTALL) != 0)
+			{
+				item->install_files[j].file_name = mm_str_duplicate(item->files[i]->path);
+				++j;
+			}
+		}
+	}
+
+	item->install_list_modified = true;
 }
 
 static void mm_parse_livery_file(mm_mod_file *file)
@@ -291,6 +351,25 @@ void mm_get_mod_file_path(const char *file_name, const char *vehicle_name_short,
 		// Someone passed this function a file that's not part of the mod, return the base path.
 		sprintf_s(buffer, buflen, "%s\\", (base_path ? base_path : ""));
 	}
+}
+
+bool mm_is_file_chosen_for_install(mm_mod_item *mod, mm_mod_file *file)
+{
+	// By default all mod files are installed, so unless the user has modified the list, include this file.
+	if (!mod->install_list_modified)
+		return true;
+
+	if (mod->install_files == NULL)
+		return false;
+
+	// Check whether the queried file is on the list of files to be installed.
+	for (int i = 0; i < mod->install_file_count; ++i)
+	{
+		if (strcmp(file->path, mod->install_files[i].file_name) == 0)
+			return true;
+	}
+
+	return false;
 }
 
 bool mm_is_valid_location(const char* location_name)

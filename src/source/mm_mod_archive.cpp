@@ -1,4 +1,5 @@
 #include "mm_mod_archive.h"
+#include "mm_controls.h"
 #include "mm_utils.h"
 #include <Windows.h>
 #include <initguid.h>
@@ -120,8 +121,11 @@ bool ModArchive::Extract(const char *targetFolder, ExtractCallback callback)
 	}
 
 	// Re-scan the archive to make sure we have the correct file indices.
-	mm_destroy_mod_item_files(mod);
+	mm_destroy_mod_item_files(mod, true);
 	ScanFiles();
+
+	// show the install progress
+	mm_show_installation_progress(mod->install_file_count);
 
 	if (mod->file_count == 0)
 	{
@@ -136,18 +140,25 @@ bool ModArchive::Extract(const char *targetFolder, ExtractCallback callback)
 
 	// Compile a list of file indices for the files we're going to extract. These would be the actual mod files.
 	UInt32 *indices = new UInt32[mod->file_count];
+	UInt32 numItems = 0;
 
 	for (unsigned int i = 0, j = 0; i < mod->item_count && j < mod->file_count; ++i)
 	{
-		if ((mod->files[i]->flags & FFLAG_MOD_FILE) != 0)
-			indices[j++] = i;
+		if ((mod->files[i]->flags & FFLAG_MOD_FILE) == 0)
+			continue;
+
+		if ((mod->files[i]->flags & FFLAG_INSTALL) == 0)
+			continue;
+		
+		indices[j++] = i;
+		numItems++;
 	}
 
 	// Use this callback to back up any files that would be overwritten.
 	extractCallback = callback;
 
 	// Now extract the files into the given folder.
-	bool succeeded = (archive->Extract(indices, mod->file_count, 0, this) == S_OK);
+	bool succeeded = (archive->Extract(indices, numItems, 0, this) == S_OK);
 
 	delete[] indices;
 	delete[] extractPath;
@@ -249,6 +260,12 @@ bool ModArchive::ScanFiles()
 		bool directory = (isDirectory.boolVal == VARIANT_TRUE);
 
 		mod->files[i] = mm_create_mod_file((unsigned char)i, path, directory);
+
+		// Check whether this file is included in the list of installable files.
+		if (mm_is_file_chosen_for_install(mod, mod->files[i]))
+		{
+			mod->files[i]->flags |= FFLAG_INSTALL;
+		}
 
 		if ((mod->files[i]->flags & FFLAG_MOD_FILE) != 0)
 		{

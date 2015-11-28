@@ -19,6 +19,7 @@ HWND mm_mod_files_combobox = { 0 };
 mm_mod_item *mm_mod_to_install = 0;
 int mm_mod_list_index = -1;
 int mm_mod_list_editing_index = -1;
+static unsigned char mm_listview_to_file_index[256];
 
 LRESULT CALLBACK mm_mod_wnd_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -51,7 +52,18 @@ LRESULT CALLBACK mm_mod_wnd_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
 
 						// set the pos of the combobox
 						SetWindowPos(mm_mod_files_combobox, 0, rect.left + 10, rect.top + 10, (rect.right - rect.left), 15, SWP_SHOWWINDOW);
-						
+
+						// find if the checkbox is checked or not
+						int list_index = LPNMLISTVIEW(lParam)->iItem;
+						int checked = ListView_GetCheckState(hdr->hwndFrom, list_index);
+
+						if (list_index < 256)
+						{
+							mm_mod_file *file = mm_mod_to_install->files[mm_listview_to_file_index[list_index]];
+
+							if (checked) file->flags |= FFLAG_INSTALL;
+							else file->flags &= ~FFLAG_INSTALL;
+						}
 					}
 				break;
 			}
@@ -228,13 +240,14 @@ void mm_mod_files_update_list(mm_mod_item *mm_mod, int listIndex)
 		// add it to the list
 		LVITEM listviewItem = { 0 };
 		listviewItem.iItem = j;
+		mm_listview_to_file_index[j] = i;
 
 		ListView_InsertItem(mm_mod_files_list, &listviewItem);
 
 		// toggle the checkbox if the mod has been installed
 		listviewItem = { 0 };
 		listviewItem.mask = LVIF_STATE;
-		listviewItem.state = 0x2000; //modItem->enabled ? 0x2000 : 0x1000; // Cosmic magic constants from hell
+		listviewItem.state = ((mod_file->flags & FFLAG_INSTALL) != 0) ? 0x2000 : 0x1000; // Cosmic magic constants from hell
 		listviewItem.stateMask = 0xF000;
 		listviewItem.iItem = j;
 		listviewItem.iSubItem = MOD_FILE_LIST_COLUMN_FILE_ENABLED;
