@@ -399,7 +399,7 @@ bool mm_has_backup_directory()
 
 mm_installed_mod *mm_is_unique_mod(mm_mod_item *checking_mod)
 {
-	for (unsigned int i = 0, j = 0; j < num_installed_mods; ++i)
+	for (unsigned int i = 0, j = 0; i < MAX_INSTALLED_MODS && j < num_installed_mods; ++i)
 	{
 		if (installed_mods[i] == NULL)
 			continue;
