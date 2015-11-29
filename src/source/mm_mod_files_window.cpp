@@ -19,6 +19,7 @@ HWND mm_mod_files_combobox = { 0 };
 mm_mod_item *mm_mod_to_install = 0;
 int mm_mod_list_index = -1;
 int mm_mod_list_editing_index = -1;
+static unsigned char mm_listview_to_file_index[256];
 
 LRESULT CALLBACK mm_mod_wnd_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -51,7 +52,18 @@ LRESULT CALLBACK mm_mod_wnd_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
 
 						// set the pos of the combobox
 						SetWindowPos(mm_mod_files_combobox, 0, rect.left + 10, rect.top + 10, (rect.right - rect.left), 15, SWP_SHOWWINDOW);
-						
+
+						// find if the checkbox is checked or not
+						int list_index = LPNMLISTVIEW(lParam)->iItem;
+						int checked = ListView_GetCheckState(hdr->hwndFrom, list_index);
+
+						if (list_index < 256)
+						{
+							mm_mod_file *file = mm_mod_to_install->files[mm_listview_to_file_index[list_index]];
+
+							if (checked) file->flags |= FFLAG_INSTALL;
+							else file->flags &= ~FFLAG_INSTALL;
+						}
 					}
 				break;
 			}
@@ -204,10 +216,7 @@ void mm_mod_files_update_list(mm_mod_item *mm_mod, int listIndex)
 	char comboboxItem[64] = { 0 };
 	for (int k = 0; k < vehicle_data->livery_count; k++)
 	{
-		if (vehicle_data->liveries[k] == 0)
-			continue;
-
-		sprintf(comboboxItem, "Livery %d (%d)", k, vehicle_data->liveries[k]);
+		sprintf(comboboxItem, "Livery %d (%02u)", (k + 1), vehicle_data->liveries[k]);
 		ComboBox_AddString(mm_mod_files_combobox, (LPARAM)comboboxItem);
 	}
 
@@ -227,14 +236,17 @@ void mm_mod_files_update_list(mm_mod_item *mm_mod, int listIndex)
 
 		// add it to the list
 		LVITEM listviewItem = { 0 };
+		char livery_name[16];
+
 		listviewItem.iItem = j;
+		mm_listview_to_file_index[j] = i;
 
 		ListView_InsertItem(mm_mod_files_list, &listviewItem);
 
 		// toggle the checkbox if the mod has been installed
 		listviewItem = { 0 };
 		listviewItem.mask = LVIF_STATE;
-		listviewItem.state = 0x2000; //modItem->enabled ? 0x2000 : 0x1000; // Cosmic magic constants from hell
+		listviewItem.state = ((mod_file->flags & FFLAG_INSTALL) != 0) ? 0x2000 : 0x1000; // Cosmic magic constants from hell
 		listviewItem.stateMask = 0xF000;
 		listviewItem.iItem = j;
 		listviewItem.iSubItem = MOD_FILE_LIST_COLUMN_FILE_ENABLED;
@@ -255,9 +267,28 @@ void mm_mod_files_update_list(mm_mod_item *mm_mod, int listIndex)
 		listviewItem.mask = LVIF_TEXT;
 
 		if ((mod_file->flags & FFLAG_TEXTURE_LIVERY) != 0)
-			listviewItem.pszText = "Livery x";
+		{
+			unsigned char livery_slot = (mod_file->install_livery != INVALID_LIVERY ? mod_file->install_livery : mod_file->livery);
+
+			for (int k = 0; k < vehicle_data->livery_count; k++)
+			{
+				if (vehicle_data->liveries[k] == livery_slot)
+				{
+					sprintf(livery_name, "Livery %d", k + 1);
+					listviewItem.pszText = livery_name;
+
+					break;
+				}
+			}
+		}
+		else if ((mod_file->flags & FFLAG_TEXTURE_INTERIOR) != 0)
+		{
+			listviewItem.pszText = "Interior";
+		}
 		else
+		{
 			listviewItem.pszText = "Not used";
+		}
 
 		listviewItem.iItem = j;
 		listviewItem.iSubItem = MOD_FILE_LIST_COLUMN_FILE_LIVERY_SLOT;
@@ -279,7 +310,7 @@ void mm_mod_files_process_command(HWND hWnd, WPARAM wParam, LPARAM lParam)
 			mm_mod_list_cancel_mod_install(mm_mod_to_install, mm_mod_list_index);
 		break;
 	}
-
+	
 	char liveryString[64] = { 0 };
 	LVITEM listviewItem = { 0 };
 	int selectedIndex = -1;
@@ -289,6 +320,15 @@ void mm_mod_files_process_command(HWND hWnd, WPARAM wParam, LPARAM lParam)
 		case CBN_SELCHANGE:
 			selectedIndex = ComboBox_GetCurSel(mm_mod_files_combobox);
 			if (selectedIndex == -1)
+				return;
+
+			mm_mod_file *file = NULL;
+
+			if (mm_mod_list_editing_index >= 0 && mm_mod_list_editing_index < 256)
+				file = mm_mod_to_install->files[mm_listview_to_file_index[mm_mod_list_editing_index]];
+
+			// Make sure the user is modifying a livery
+			if (file == NULL || (file->flags & FFLAG_TEXTURE_LIVERY) == 0)
 				return;
 
 			listviewItem.mask = LVIF_TEXT;
@@ -302,6 +342,10 @@ void mm_mod_files_process_command(HWND hWnd, WPARAM wParam, LPARAM lParam)
 
 			SendMessage(mm_mod_files_list, LVM_SETITEMTEXT, mm_mod_list_editing_index, (WPARAM)&listviewItem);
 			SetWindowPos(mm_mod_files_combobox, 0, 0, 0, 0, 0, 0);
+
+			// Select the livery slot for installation
+			if (selectedIndex < file->vehicle->livery_count)
+				file->install_livery = file->vehicle->liveries[selectedIndex];
 		break;
 	}
 }

@@ -288,9 +288,6 @@ bool mm_install_mod(mm_mod_item *mod)
 	if (mod_index == MAX_INSTALLED_MODS)
 		return false;
 
-	// show the install progress
-	mm_show_installation_progress(mod->file_count);
-
 	// Open the mod archive and extract it to the game folder. Our callback function will take care of backing up original files.
 	ModArchive *archive = new ModArchive(mod);
 
@@ -304,21 +301,34 @@ bool mm_install_mod(mm_mod_item *mod)
 
 		inst_mod->file_path = mm_str_duplicate(mod->mod_name);
 		inst_mod->file_crc = mod->file_crc;
-		inst_mod->file_count = mod->file_count;
+		inst_mod->file_count = mod->install_file_count;
 
-		inst_mod->files = new mm_installed_file[mod->file_count];
+		inst_mod->files = new mm_installed_file[mod->install_file_count];
 
 		for (unsigned int i = 0, j = 0; i < mod->item_count && j < mod->file_count; ++i)
 		{
 			if ((mod->files[i]->flags & FFLAG_MOD_FILE) == 0)
 				continue;
 
-			inst_mod->files[j].file_name = mm_str_duplicate(mod->files[i]->name);
+			if ((mod->files[i]->flags & FFLAG_INSTALL) == 0)
+				continue;
 
 			mm_str_cpy(inst_mod->files[j].vehicle_short, mod->files[i]->vehicle->short_name, sizeof(inst_mod->files[i].vehicle_short));
-			inst_mod->files[j].flags = mod->files[i]->flags;
-			inst_mod->files[j].livery = mod->files[i]->livery;
 
+			inst_mod->files[j].file_name = mm_str_duplicate(mod->files[i]->name);
+			inst_mod->files[j].flags = mod->files[i]->flags;
+
+			// Check whether the user wants to install this livery to another slot.
+			if (mod->files[i]->install_livery != INVALID_LIVERY)
+			{
+				inst_mod->files[j].livery = mod->files[i]->install_livery;
+				mm_str_replace_livery_slot(inst_mod->files[j].file_name, mod->files[i]->install_livery);
+			}
+			else
+			{
+				inst_mod->files[j].livery = mod->files[i]->livery;
+			}
+			
 			++j;
 		}
 
@@ -346,7 +356,7 @@ bool mm_uninstall_mod(mm_mod_item *mod)
 	}
 
 	// toggle the progress bar
-	mm_show_installation_progress(mod->file_count, false);
+	mm_show_installation_progress(installed->file_count, false);
 
 	for (unsigned int i = 0; i < installed->file_count; ++i)
 	{
@@ -399,7 +409,7 @@ bool mm_has_backup_directory()
 
 mm_installed_mod *mm_is_unique_mod(mm_mod_item *checking_mod)
 {
-	for (unsigned int i = 0, j = 0; j < num_installed_mods; ++i)
+	for (unsigned int i = 0, j = 0; i < MAX_INSTALLED_MODS && j < num_installed_mods; ++i)
 	{
 		if (installed_mods[i] == NULL)
 			continue;
