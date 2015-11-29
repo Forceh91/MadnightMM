@@ -114,6 +114,23 @@ char *mm_str_duplicate(const char *text)
 	return str;
 }
 
+void mm_str_replace_livery_slot(char *file_name, unsigned char livery)
+{
+	size_t l = strlen(file_name);
+
+	// Go backwards until the extension has been stripped
+	for (; l >= 0; --l)
+	{
+		if (file_name[l] == '.')
+		{
+			if (l >= 2)
+				sprintf(&file_name[l - 2], "%02u.pssg", livery);
+
+			break;
+		}
+	}
+}
+
 void mm_ensure_folder_exists(const char *path)
 {
 	DWORD attrib = GetFileAttributes(path);

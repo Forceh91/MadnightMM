@@ -140,6 +140,8 @@ static void mm_list_installable_files(mm_mod_item *item)
 				(item->files[i]->flags & FFLAG_INSTALL) != 0)
 			{
 				item->install_files[j].file_name = mm_str_duplicate(item->files[i]->path);
+				item->install_files[j].livery = item->files[i]->install_livery;
+
 				++j;
 			}
 		}
@@ -235,6 +237,8 @@ mm_mod_file *mm_create_mod_file(unsigned char index, const char *file, bool dire
 	mm_mod_file *mod_file = new mm_mod_file();
 	mod_file->index = index;
 	mod_file->flags = FFLAG_NONE;
+	mod_file->livery = INVALID_LIVERY;
+	mod_file->install_livery = INVALID_LIVERY;
 	
 	if (directory)
 		mod_file->flags |= FFLAG_DIRECTORY;
@@ -300,12 +304,30 @@ void mm_get_mod_file_path(mm_mod_file *file, char *buffer, size_t buflen, const 
 	if ((file->flags & FFLAG_TEXTURE_LIVERY) != 0)
 	{
 		// File is a car livery.
+		unsigned char livery = file->livery;
+		char file_name_buf[MAX_PATH], *file_name = file->name;
+
+		// Check whether the user wants to install this livery to another slot.
+		if (file->install_livery != INVALID_LIVERY)
+		{
+			livery = file->install_livery;
+
+			if (include_file)
+			{
+				// Embed the livery slot into the file name.
+				char *s = strcpy(file_name_buf, file->name);
+				mm_str_replace_livery_slot(s, livery);
+
+				file_name = s;
+			}
+		}
+
 		sprintf_s(buffer, buflen, "%s\\cars\\models\\%s\\livery_%02u\\textures_%s\\%s",
 			(base_path ? base_path : ""),
 			file->vehicle->short_name,
-			file->livery,
+			livery,
 			((file->flags & FFLAG_QUALITY_HIGH) != 0 ? "high" : "low"),
-			(include_file ? file->name : ""));
+			(include_file ? file_name : ""));
 	}
 
 	else if ((file->flags & FFLAG_TEXTURE_INTERIOR) != 0)
@@ -366,7 +388,10 @@ bool mm_is_file_chosen_for_install(mm_mod_item *mod, mm_mod_file *file)
 	for (int i = 0; i < mod->install_file_count; ++i)
 	{
 		if (strcmp(file->path, mod->install_files[i].file_name) == 0)
+		{
+			file->install_livery = mod->install_files[i].livery;
 			return true;
+		}
 	}
 
 	return false;

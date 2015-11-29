@@ -313,12 +313,22 @@ bool mm_install_mod(mm_mod_item *mod)
 			if ((mod->files[i]->flags & FFLAG_INSTALL) == 0)
 				continue;
 
-			inst_mod->files[j].file_name = mm_str_duplicate(mod->files[i]->name);
-
 			mm_str_cpy(inst_mod->files[j].vehicle_short, mod->files[i]->vehicle->short_name, sizeof(inst_mod->files[i].vehicle_short));
-			inst_mod->files[j].flags = mod->files[i]->flags;
-			inst_mod->files[j].livery = mod->files[i]->livery;
 
+			inst_mod->files[j].file_name = mm_str_duplicate(mod->files[i]->name);
+			inst_mod->files[j].flags = mod->files[i]->flags;
+
+			// Check whether the user wants to install this livery to another slot.
+			if (mod->files[i]->install_livery != INVALID_LIVERY)
+			{
+				inst_mod->files[j].livery = mod->files[i]->install_livery;
+				mm_str_replace_livery_slot(inst_mod->files[j].file_name, mod->files[i]->install_livery);
+			}
+			else
+			{
+				inst_mod->files[j].livery = mod->files[i]->livery;
+			}
+			
 			++j;
 		}
 

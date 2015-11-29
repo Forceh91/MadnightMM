@@ -21,6 +21,8 @@ enum ModFileFlags {
 	FFLAG_MOD_FILE = (FFLAG_TEXTURE_LIVERY|FFLAG_TEXTURE_INTERIOR|FFLAG_LOCATION_FILE),
 };
 
+#define INVALID_LIVERY 0xFF
+
 typedef struct _mm_vehicle_data mm_vehicle_data;
 typedef struct _mm_stage_data mm_stage_data;
 
@@ -31,6 +33,7 @@ typedef struct _mm_mod_file
 	unsigned char index; // index of the file within the archive
 	unsigned char flags; // flags for this mod file (see ModFileFlags above)
 	unsigned char livery; // index of the livery
+	unsigned char install_livery; // index of the livery slot this skin is to be installed to
 	mm_vehicle_data *vehicle; // vehicle this file changes
 	mm_stage_data *stage; // stage this file changes
 
@@ -39,6 +42,7 @@ typedef struct _mm_mod_file
 typedef struct _mm_mod_install_file
 {
 	char *file_name; // name of the file that should be installed (including path and extension)
+	unsigned char livery; // livery slot this livery should be installed to, or INVALID_LIVERY if not changed
 
 } mm_mod_install_file;
 
