@@ -216,7 +216,9 @@ void mm_mod_files_update_list(mm_mod_item *mm_mod, int listIndex)
 	char comboboxItem[64] = { 0 };
 	for (int k = 0; k < vehicle_data->livery_count; k++)
 	{
-		sprintf(comboboxItem, "Livery %d (%02u)", (k + 1), vehicle_data->liveries[k]);
+		// TODO: Commented out the livery slot until DiRT's slot index system is figured out.
+		//sprintf(comboboxItem, "Livery %d (%02u)", (k + 1), vehicle_data->liveries[k]);
+		sprintf(comboboxItem, "Livery %02u", vehicle_data->liveries[k]);
 		ComboBox_AddString(mm_mod_files_combobox, (LPARAM)comboboxItem);
 	}
 
@@ -274,7 +276,9 @@ void mm_mod_files_update_list(mm_mod_item *mm_mod, int listIndex)
 			{
 				if (vehicle_data->liveries[k] == livery_slot)
 				{
-					sprintf(livery_name, "Livery %d", k + 1);
+					// TODO: Commented out the livery slot until DiRT's slot index system is figured out.
+					//sprintf(livery_name, "Livery %d", k + 1);
+					sprintf(livery_name, "Livery %02u", livery_slot);
 					listviewItem.pszText = livery_name;
 
 					break;
@@ -333,7 +337,9 @@ void mm_mod_files_process_command(HWND hWnd, WPARAM wParam, LPARAM lParam)
 
 			listviewItem.mask = LVIF_TEXT;
 
-			sprintf(liveryString, "Livery %d", (selectedIndex + 1));
+			// TODO: Commented out the livery slot until DiRT's slot index system is figured out.
+			//sprintf(liveryString, "Livery %d", (selectedIndex + 1));
+			sprintf(liveryString, "Livery %02u", file->vehicle->liveries[selectedIndex]);
 
 			listviewItem.iItem = mm_mod_list_editing_index;
 			listviewItem.mask = LVIF_TEXT;
